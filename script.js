@@ -1,15 +1,15 @@
 // Musicians Data
 const musiciansData = [
     { name: "Lorenzo Dasilva", instrument: "Cello", imageLink: "" },
-    { name: "Jason Liu", instrument: "Cello", imageLink: "images/IMG_5587.png" },
-    { name: "Advaith Balakrishnan", instrument: "Cello", imageLink: "images/IMG_5580.jpg" },
-    { name: "Anthony Barakat", instrument: "Cello", imageLink: "images/IMG_5582.jpg" },
-    { name: "Vincent Lan", instrument: "Violin", imageLink: "images/IMG_5578.jpg" },
-    { name: "Steven Zhao", instrument: "Violin", imageLink: "images/IMG_5579.jpg" },
-    { name: "Max Zheng", instrument: "Violin", imageLink: "images/IMG_5584.png" },
+    { name: "Jason Liu", instrument: "Cello", imageLink: "images/IMG_5587.PNG" },
+    { name: "Advaith Balakrishnan", instrument: "Cello", imageLink: "images/IMG_5580.JPG" },
+    { name: "Anthony Barakat", instrument: "Cello", imageLink: "images/IMG_5582.JPG" },
+    { name: "Vincent Lan", instrument: "Violin", imageLink: "images/IMG_5578.JPG" },
+    { name: "Steven Zhao", instrument: "Violin", imageLink: "images/IMG_5579.JPG" },
+    { name: "Max Zheng", instrument: "Violin", imageLink: "images/IMG_5584.PNG" },
     { name: "Brandon Kim", instrument: "Violin", imageLink: "" },
-    { name: "Isaiah Shin", instrument: "Viola", imageLink: "images/IMG_5583.png" },
-    { name: "Oliver Clary", instrument: "Bass", imageLink: "images/IMG_5576.jpg" }
+    { name: "Isaiah Shin", instrument: "Viola", imageLink: "images/IMG_5583.PNG" },
+    { name: "Oliver Clary", instrument: "Bass", imageLink: "images/IMG_5576.JPG" }
 ];
 
 // Schedule Data
