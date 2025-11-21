@@ -1,6 +1,6 @@
 // Musicians Data
 const musiciansData = [
-    { name: "Lorenzo Dasilva", instrument: "Cello", imageLink: "" },
+    { name: "Lorenzo Dasilva", instrument: "Cello", imageLink: "images/IMG1.jpg" },
     { name: "Jason Liu", instrument: "Cello", imageLink: "images/IMG_5587.PNG" },
     { name: "Advaith Balakrishnan", instrument: "Cello", imageLink: "images/IMG_5580.JPG" },
     { name: "Anthony Barakat", instrument: "Cello", imageLink: "images/IMG_5582.JPG" },
@@ -15,13 +15,20 @@ const musiciansData = [
 // Schedule Data
 const scheduleData = [
     {
-        date: "December 1, 2025",
+        date: "December 2, 2025",
         title: "Timeless Treasures",
-        location: "The Sheridan at Oak Brook",
-        time: "7:00 PM",
-        description: "Join us for an evening of classical favorites and holiday arrangements."
+        location: "The Birches",
+        time: "6:00 PM",
+        description: "Classical favorites and holiday arrangements!"
     },
-    // {
+    {
+        date: "December 7, 2025",
+        title: "Timeless Treasures",
+        location: "Eden Vista",
+        time: "2:00 PM",
+        description: "Classical favorites and holiday arrangements!"
+    }
+        // {
     //     date: "",
     //     title: "",
     //     location: "",
@@ -163,6 +170,12 @@ function setupScrollAnimations() {
         });
     }, observerOptions);
 
+    // Observe founder message
+    const founderMessage = document.querySelector('.founder-message');
+    if (founderMessage) {
+        observer.observe(founderMessage);
+    }
+
     // Observe member cards
     document.querySelectorAll('.member-card').forEach((card, index) => {
         card.style.transitionDelay = `${index * 0.05}s`;
@@ -255,6 +268,38 @@ function setupHeaderScroll() {
     window.addEventListener('scroll', requestTick);
 }
 
+// YouTube Thumbnail Loader
+function setupYouTubeThumbnails() {
+    const videoThumbnails = document.querySelectorAll('.video-thumbnail');
+    
+    videoThumbnails.forEach(thumbnail => {
+        const youtubeId = thumbnail.getAttribute('data-youtube-id');
+        
+        if (youtubeId && youtubeId !== 'YOUR_VIDEO_ID_1' && youtubeId !== 'YOUR_VIDEO_ID_2' && youtubeId !== 'YOUR_VIDEO_ID_3') {
+            // Use maxresdefault for highest quality, fallback to hqdefault
+            const thumbnailUrl = `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`;
+            
+            // Create image element to check if maxresdefault exists
+            const img = new Image();
+            img.onload = function() {
+                if (img.width > 120) { // maxresdefault exists
+                    thumbnail.style.backgroundImage = `url(${thumbnailUrl})`;
+                } else { // Fallback to hqdefault
+                    thumbnail.style.backgroundImage = `url(https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg)`;
+                }
+            };
+            img.onerror = function() {
+                // Fallback to hqdefault if maxresdefault doesn't exist
+                thumbnail.style.backgroundImage = `url(https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg)`;
+            };
+            img.src = thumbnailUrl;
+        } else {
+            // Use placeholder if no YouTube ID is set
+            thumbnail.style.backgroundImage = `linear-gradient(135deg, var(--medium-gray), var(--dark-gray))`;
+        }
+    });
+}
+
 // Initialize Everything
 document.addEventListener('DOMContentLoaded', () => {
     renderMusicians();
@@ -265,6 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupScrollAnimations();
     setupContactForm();
     setupHeaderScroll();
+    setupYouTubeThumbnails();
     
     console.log('Devils Dectet website initialized successfully! 🎻');
 });
