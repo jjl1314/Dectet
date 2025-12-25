@@ -1,14 +1,14 @@
 // Musicians Data
 const musiciansData = [
-    { name: "Lorenzo Dasilva", instrument: "Cello", imageLink: "images/IMG1.jpg" },
-    { name: "Jason Liu", instrument: "Cello", imageLink: "images/IMG_5587.PNG" },
-    { name: "Advaith Balakrishnan", instrument: "Cello", imageLink: "images/IMG_5580.JPG" },
+    { name: "Isaiah Shin", instrument: "Viola", imageLink: "images/IMG_5968.jpg", role: "Founder" },
+    { name: "Jason Liu", instrument: "Cello", imageLink: "images/IMG_5587.PNG", role: "Co-Founder" },
     { name: "Anthony Barakat", instrument: "Cello", imageLink: "images/IMG_5582.JPG" },
+    { name: "Lorenzo Dasilva", instrument: "Cello", imageLink: "images/IMG1.jpg" },
+    { name: "Advaith Balakrishnan", instrument: "Cello", imageLink: "images/IMG_5580.JPG" },
     { name: "Vincent Lan", instrument: "Violin", imageLink: "images/IMG_5578.JPG" },
     { name: "Steven Zhao", instrument: "Violin", imageLink: "images/IMG_5579.JPG" },
     { name: "Max Zheng", instrument: "Violin", imageLink: "images/IMG_5584.PNG" },
-    { name: "Brandon Kim", instrument: "Violin", imageLink: "" },
-    { name: "Isaiah Shin", instrument: "Viola", imageLink: "images/IMG_5583.PNG" },
+    { name: "Brandon Kim", instrument: "Violin", imageLink: "images/IMG_5604.JPG" },
     { name: "Oliver Clary", instrument: "Bass", imageLink: "images/IMG_5576.JPG" }
 ];
 
@@ -21,14 +21,7 @@ const scheduleData = [
         time: "6:00 PM",
         description: "Classical favorites and holiday arrangements!"
     },
-    {
-        date: "December 7, 2025",
-        title: "Timeless Treasures",
-        location: "Eden Vista",
-        time: "2:00 PM",
-        description: "Classical favorites and holiday arrangements!"
-    }
-        // {
+    // {
     //     date: "",
     //     title: "",
     //     location: "",
@@ -38,19 +31,23 @@ const scheduleData = [
 ];
 
 // Render Musicians
+// Render Musicians - Updated version
 function renderMusicians() {
     const grid = document.getElementById('membersGrid');
     if (!grid) return;
 
     grid.innerHTML = musiciansData.map(musician => {
-        const icon = musician.imageLink 
+        const hasRole = musician.role && (musician.role === "Founder" || musician.role === "Co-Founder");
+
+        const icon = musician.imageLink
             ? `<img src="${musician.imageLink}" alt="${musician.name}">`
             : `<div class="member-photo-icon">🎻</div>`;
 
         return `
-            <div class="member-card">
+            <div class="member-card" ${hasRole ? `data-role="${musician.role}"` : ''}>
                 <div class="member-photo">
                     ${icon}
+                    ${hasRole ? `<span class="role-badge">${musician.role}</span>` : ''}
                 </div>
                 <div class="member-info">
                     <h3>${musician.name}</h3>
@@ -115,7 +112,7 @@ function setupActiveNav() {
 
     window.addEventListener('scroll', () => {
         let current = '';
-        
+
         sections.forEach(section => {
             const sectionTop = section.offsetTop;
             const sectionHeight = section.clientHeight;
@@ -142,7 +139,7 @@ function setupSmoothScrolling() {
             if (target) {
                 const navHeight = document.querySelector('header').offsetHeight;
                 const targetPosition = target.offsetTop - navHeight;
-                
+
                 window.scrollTo({
                     top: targetPosition,
                     behavior: 'smooth'
@@ -199,31 +196,6 @@ function setupScrollAnimations() {
     });
 }
 
-// Contact Form
-function setupContactForm() {
-    const form = document.getElementById('contactForm');
-    const formStatus = document.getElementById('formStatus');
-
-    if (!form) return;
-
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        formStatus.style.color = '#FFD700';
-        formStatus.textContent = 'Sending message...';
-
-        // Simulate sending (replace with actual backend integration)
-        setTimeout(() => {
-            formStatus.style.color = '#4CAF50';
-            formStatus.textContent = 'Thank you! Your message has been sent. We will be in touch soon.';
-            form.reset();
-            
-            setTimeout(() => {
-                formStatus.textContent = '';
-            }, 5000);
-        }, 1500);
-    });
-}
 
 // Header Scroll Effect - Hide on scroll down, show on scroll up
 function setupHeaderScroll() {
@@ -233,17 +205,17 @@ function setupHeaderScroll() {
 
     function updateHeader() {
         const currentScrollY = window.scrollY;
-        
+
         if (currentScrollY > 100) {
             // Scrolling down - hide header
             if (currentScrollY > lastScrollY) {
                 header.style.transform = 'translateY(-100%)';
-            } 
+            }
             // Scrolling up - show header
             else {
                 header.style.transform = 'translateY(0)';
             }
-            
+
             header.style.padding = '0.8rem 0';
             header.style.boxShadow = '0 4px 30px rgba(220, 20, 60, 0.2)';
             header.style.transition = 'transform 0.3s ease, padding 0.3s ease, box-shadow 0.3s ease';
@@ -253,7 +225,7 @@ function setupHeaderScroll() {
             header.style.padding = '1.2rem 0';
             header.style.boxShadow = '0 4px 30px rgba(220, 20, 60, 0.1)';
         }
-        
+
         lastScrollY = currentScrollY;
         ticking = false;
     }
@@ -271,24 +243,24 @@ function setupHeaderScroll() {
 // YouTube Thumbnail Loader
 function setupYouTubeThumbnails() {
     const videoThumbnails = document.querySelectorAll('.video-thumbnail');
-    
+
     videoThumbnails.forEach(thumbnail => {
         const youtubeId = thumbnail.getAttribute('data-youtube-id');
-        
+
         if (youtubeId && youtubeId !== 'YOUR_VIDEO_ID_1' && youtubeId !== 'YOUR_VIDEO_ID_2' && youtubeId !== 'YOUR_VIDEO_ID_3') {
             // Use maxresdefault for highest quality, fallback to hqdefault
             const thumbnailUrl = `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`;
-            
+
             // Create image element to check if maxresdefault exists
             const img = new Image();
-            img.onload = function() {
+            img.onload = function () {
                 if (img.width > 120) { // maxresdefault exists
                     thumbnail.style.backgroundImage = `url(${thumbnailUrl})`;
                 } else { // Fallback to hqdefault
                     thumbnail.style.backgroundImage = `url(https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg)`;
                 }
             };
-            img.onerror = function() {
+            img.onerror = function () {
                 // Fallback to hqdefault if maxresdefault doesn't exist
                 thumbnail.style.backgroundImage = `url(https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg)`;
             };
@@ -311,6 +283,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setupContactForm();
     setupHeaderScroll();
     setupYouTubeThumbnails();
-    
-    console.log('Devils Dectet website initialized successfully! 🎻');
+
+    console.log('Devils Dectet website initialized successfully!');
 });
