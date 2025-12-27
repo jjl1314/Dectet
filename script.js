@@ -240,38 +240,38 @@ function setupHeaderScroll() {
     window.addEventListener('scroll', requestTick);
 }
 
-// YouTube Thumbnail Loader
+// YouTube Thumbnail Loader - UPDATED VERSION
 function setupYouTubeThumbnails() {
     const videoThumbnails = document.querySelectorAll('.video-thumbnail');
 
     videoThumbnails.forEach(thumbnail => {
         const youtubeId = thumbnail.getAttribute('data-youtube-id');
-
-        if (youtubeId && youtubeId !== 'YOUR_VIDEO_ID_1' && youtubeId !== 'YOUR_VIDEO_ID_2' && youtubeId !== 'YOUR_VIDEO_ID_3') {
-            // Use maxresdefault for highest quality, fallback to hqdefault
-            const thumbnailUrl = `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`;
-
-            // Create image element to check if maxresdefault exists
-            const img = new Image();
-            img.onload = function () {
-                if (img.width > 120) { // maxresdefault exists
-                    thumbnail.style.backgroundImage = `url(${thumbnailUrl})`;
-                } else { // Fallback to hqdefault
-                    thumbnail.style.backgroundImage = `url(https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg)`;
-                }
-            };
-            img.onerror = function () {
-                // Fallback to hqdefault if maxresdefault doesn't exist
-                thumbnail.style.backgroundImage = `url(https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg)`;
-            };
-            img.src = thumbnailUrl;
+        
+        console.log('YouTube ID:', youtubeId); // Debug log
+        
+        if (youtubeId && youtubeId.trim() !== '') {
+            // Clean the YouTube ID (remove any URL parameters)
+            const cleanId = youtubeId.split('&')[0]; // Remove &t=15s etc.
+            
+            // Use hqdefault for reliability
+            const thumbnailUrl = `https://img.youtube.com/vi/${cleanId}/hqdefault.jpg`;
+            
+            console.log('Thumbnail URL:', thumbnailUrl); // Debug log
+            
+            // Set the background image
+            thumbnail.style.backgroundImage = `url('${thumbnailUrl}')`;
+            
+            // Add a fallback in case the image fails to load
+            thumbnail.style.backgroundColor = 'var(--dark-gray)';
+            thumbnail.style.backgroundSize = 'cover';
+            thumbnail.style.backgroundPosition = 'center';
+            thumbnail.style.backgroundRepeat = 'no-repeat';
         } else {
-            // Use placeholder if no YouTube ID is set
-            thumbnail.style.backgroundImage = `linear-gradient(135deg, var(--medium-gray), var(--dark-gray))`;
+            // Use gradient fallback
+            thumbnail.style.backgroundImage = 'linear-gradient(135deg, var(--medium-gray), var(--dark-gray))';
         }
     });
 }
-
 // Initialize Everything
 document.addEventListener('DOMContentLoaded', () => {
     renderMusicians();
@@ -280,7 +280,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setupActiveNav();
     setupSmoothScrolling();
     setupScrollAnimations();
-    setupContactForm();
     setupHeaderScroll();
     setupYouTubeThumbnails();
 
