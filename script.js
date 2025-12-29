@@ -215,14 +215,13 @@ function setupHeaderScroll() {
             else {
                 header.style.transform = 'translateY(0)';
             }
-
-            header.style.padding = '0.8rem 0';
+            
+            // DON'T change padding, only transform
             header.style.boxShadow = '0 4px 30px rgba(220, 20, 60, 0.2)';
-            header.style.transition = 'transform 0.3s ease, padding 0.3s ease, box-shadow 0.3s ease';
         } else {
-            // At top of page - always show
+            // At top of page
             header.style.transform = 'translateY(0)';
-            header.style.padding = '1.2rem 0';
+            // DON'T change padding
             header.style.boxShadow = '0 4px 30px rgba(220, 20, 60, 0.1)';
         }
 
@@ -272,6 +271,46 @@ function setupYouTubeThumbnails() {
         }
     });
 }
+
+// Gallery Lightbox
+function setupGalleryLightbox() {
+    const galleryItems = document.querySelectorAll('.gallery-item');
+    
+    galleryItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const photo = this.querySelector('.gallery-photo');
+            const backgroundImage = window.getComputedStyle(photo).backgroundImage;
+            const imageUrl = backgroundImage.slice(5, -2); // Extract URL from CSS
+            
+            // Create lightbox
+            const lightbox = document.createElement('div');
+            lightbox.className = 'lightbox';
+            lightbox.innerHTML = `
+                <div class="lightbox-content">
+                    <img src="${imageUrl}" alt="Gallery Photo">
+                    <button class="lightbox-close">&times;</button>
+                </div>
+            `;
+            
+            document.body.appendChild(lightbox);
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+            
+            // Close lightbox
+            const closeBtn = lightbox.querySelector('.lightbox-close');
+            closeBtn.addEventListener('click', () => {
+                document.body.removeChild(lightbox);
+                document.body.style.overflow = '';
+            });
+            
+            lightbox.addEventListener('click', (e) => {
+                if (e.target === lightbox) {
+                    document.body.removeChild(lightbox);
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+    });
+}
 // Initialize Everything
 document.addEventListener('DOMContentLoaded', () => {
     renderMusicians();
@@ -282,6 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupScrollAnimations();
     setupHeaderScroll();
     setupYouTubeThumbnails();
-
+    setupGalleryLightbox();
+    
     console.log('Devils Dectet website initialized successfully!');
 });
