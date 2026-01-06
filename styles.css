@@ -158,8 +158,8 @@ nav ul li a.active::after {
 .hero-background {
     position: absolute;
     inset: 0;
-    background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.9)),
-        url("images/dectet.png") center/cover;
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)),
+        url("images/holiday.jpg") center/cover;
     z-index: -2;
 }
 
