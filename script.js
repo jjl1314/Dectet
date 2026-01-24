@@ -1,17 +1,68 @@
 // Musicians Data
 const musiciansData = [
-    { name: "Isaiah Shin", instrument: "Viola", imageLink: "images/IMG_5968.jpg", role: "Founder" },
-    { name: "Jason Liu", instrument: "Cello", imageLink: "images/IMG_5587.PNG", role: "Co-Founder" },
-    { name: "Anthony Barakat", instrument: "Cello", imageLink: "images/IMG_5582.JPG" },
-    { name: "Lorenzo Dasilva", instrument: "Cello", imageLink: "images/IMG1.jpg" },
-    { name: "Advaith Balakrishnan", instrument: "Cello", imageLink: "images/IMG_5580.JPG" },
-    { name: "Vincent Lan", instrument: "Violin", imageLink: "images/IMG_5578.JPG" },
-    { name: "Steven Zhao", instrument: "Violin", imageLink: "images/IMG_5579.JPG" },
-    { name: "Max Zheng", instrument: "Violin", imageLink: "images/IMG_5584.PNG" },
-    { name: "Brandon Kim", instrument: "Violin", imageLink: "images/IMG_5604.JPG" },
-    { name: "Oliver Clary", instrument: "Bass", imageLink: "images/IMG_5576.JPG" }
+    { 
+        name: "Isaiah Shin", 
+        instrument: "Viola", 
+        imageLink: "images/IMG_5968.jpg", 
+        role: "Founder",
+        bio: "Hi there! My name is Isaiah Shin. Outside of orchestra, I play football and compete in triathlons. I am also the head play-by-play announcer for the Hinsdale Central Basketball Team. Additionally, I go on yearly mission trips to El Salvador and play on the school’s varsity 7v7 football program in the spring."
+    },
+    { 
+        name: "Jason Liu", 
+        instrument: "Cello", 
+        imageLink: "images/IMG_5587.PNG", 
+        role: "Founder",
+        bio: "Hey, I’m Jason! When I’m not playing music with my friends, you’ll find me in a studio singing or at my desk building my next website. To me, music is sound, code is logic, and somewhere in between feels like home."
+    },
+    { 
+        name: "Anthony Barakat", 
+        instrument: "Cello", 
+        imageLink: "images/IMG_5582.JPG",
+        bio: "Hello, my name is Anthony! Outside of orchestra I play tennis and love doing things outdoors like camping. I also enjoy public speaking through clubs like Debate and Model UN."
+    },
+    { 
+        name: "Lorenzo Dasilva", 
+        instrument: "Cello", 
+        imageLink: "images/IMG1.jpg",
+        bio: "I’m part of the Hinsdale Community rowing team and enjoy playing soccer."
+    },
+    { 
+        name: "Advaith Balakrishnan", 
+        instrument: "Cello", 
+        imageLink: "images/IMG_5580.JPG",
+        bio: "I’m Advaith Balakrishnan, a current junior at Hinsdale Central High School. I have played cello since 5th grade. Outside of orchestra, I enjoy playing piano and singing Indian classical music. Additionally I am a part of my school’s track and field team and I am a starter on the Hinsdale Central Boys Varsity Soccer team."
+    },
+    { 
+        name: "Vincent Lan", 
+        instrument: "Violin", 
+        imageLink: "images/IMG_5578.JPG",
+        bio: "I am a young violinist, violist, and composer. I have received numerous accolades since he began learning to play at the age of 4. These include placing first in the Granquist Music Competition and IMA State Contest multiple times. I have also been a member of the Chicago Youth Symphony Orchestras, and am the concertmaster of Hinsdale Central High School's Philharmonic Orchestra."
+    },
+    { 
+        name: "Steven Zhao", 
+        instrument: "Violin", 
+        imageLink: "images/IMG_5579.JPG",
+        bio: "Hello, my name is Steven Zhao and I play the violin. Outside of orchestra, I participate in Robotics, Scholastic Bowl, Model UN, and Math Team. I also enjoy playing video games and hanging out with friends."
+    },
+    { 
+        name: "Max Zheng", 
+        instrument: "Violin", 
+        imageLink: "images/IMG_5584.PNG",
+        bio: "Hello, I’m Max, a junior at Hinsdale Central. I have been playing violin for almost 3 years, and piano for 11. I am super passionate about music. I love listening to and playing classical music, and I love playing music with friends. My favorite composers are Rachmaninoff, Stravinsky, and Shostakovich. Along with music, I am also passionate about mathematics."
+    },
+    { 
+        name: "Brandon Kim", 
+        instrument: "Violin", 
+        imageLink: "images/IMG_5604.JPG",
+        bio: ""
+    },
+    { 
+        name: "Oliver Clary", 
+        instrument: "Bass", 
+        imageLink: "images/IMG_5576.JPG",
+        bio: "As a student at Hinsdale Central, I participate in Football in the fall and Shotput in the spring. Outside of sports I like playing cards and fishing."
+    }
 ];
-
 // Schedule Data
 const scheduleData = [
     {
@@ -32,19 +83,21 @@ const scheduleData = [
 
 // Render Musicians
 // Render Musicians - Updated version
+// Render Musicians with clickable cards
+// Render Musicians with clickable cards and data attributes
 function renderMusicians() {
     const grid = document.getElementById('membersGrid');
     if (!grid) return;
 
-    grid.innerHTML = musiciansData.map(musician => {
+    grid.innerHTML = musiciansData.map((musician, index) => {
         const hasRole = musician.role && (musician.role === "Founder" || musician.role === "Co-Founder");
 
         const icon = musician.imageLink
-            ? `<img src="${musician.imageLink}" alt="${musician.name}">`
+            ? `<img src="${musician.imageLink}" alt="${musician.name}" loading="lazy">`
             : `<div class="member-photo-icon">🎻</div>`;
 
         return `
-            <div class="member-card" ${hasRole ? `data-role="${musician.role}"` : ''}>
+            <div class="member-card" data-member-index="${index}" ${hasRole ? `data-role="${musician.role}"` : ''}>
                 <div class="member-photo">
                     ${icon}
                     ${hasRole ? `<span class="role-badge">${musician.role}</span>` : ''}
@@ -311,6 +364,142 @@ function setupGalleryLightbox() {
         });
     });
 }
+// Member Biography Modal - Updated with image handling
+function setupMemberBiographies() {
+    const memberCards = document.querySelectorAll('.member-card');
+    
+    // Create modal HTML structure
+    const modalHTML = `
+        <div class="bio-modal">
+            <div class="bio-modal-overlay"></div>
+            <div class="bio-modal-content">
+                <button class="bio-modal-close">&times;</button>
+                <div class="bio-modal-body">
+                    <div class="bio-image-container" id="bio-image-container">
+                        <img id="bio-modal-image" src="" alt="">
+                    </div>
+                    <div class="bio-text-container">
+                        <h2 id="bio-modal-name"></h2>
+                        <p class="bio-instrument" id="bio-modal-instrument"></p>
+                        <p class="bio-role" id="bio-modal-role"></p>
+                        <div class="bio-description">
+                            <p id="bio-modal-bio"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    const modal = document.querySelector('.bio-modal');
+    const imageContainer = document.getElementById('bio-image-container');
+    const modalImage = document.getElementById('bio-modal-image');
+    const modalName = document.getElementById('bio-modal-name');
+    const modalInstrument = document.getElementById('bio-modal-instrument');
+    const modalRole = document.getElementById('bio-modal-role');
+    const modalBio = document.getElementById('bio-modal-bio');
+    const closeBtn = document.querySelector('.bio-modal-close');
+    
+    // Function to load image with error handling
+    function loadMemberImage(imageSrc, memberName) {
+        return new Promise((resolve, reject) => {
+            if (!imageSrc) {
+                imageContainer.classList.remove('has-image');
+                resolve(false);
+                return;
+            }
+            
+            const img = new Image();
+            img.onload = () => {
+                modalImage.src = imageSrc;
+                modalImage.alt = memberName;
+                imageContainer.classList.add('has-image');
+                resolve(true);
+            };
+            img.onerror = () => {
+                console.log(`Failed to load image: ${imageSrc}`);
+                imageContainer.classList.remove('has-image');
+                modalImage.src = '';
+                modalImage.alt = '';
+                resolve(false);
+            };
+            img.src = imageSrc;
+        });
+    }
+    
+    // Add click event to each member card
+    memberCards.forEach(card => {
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', async function() {
+            const memberIndex = this.getAttribute('data-member-index');
+            const member = musiciansData[memberIndex];
+            
+            // Show loading state
+            modalImage.src = '';
+            imageContainer.classList.remove('has-image');
+            modalName.textContent = 'Loading...';
+            modalInstrument.textContent = '';
+            modalRole.textContent = '';
+            modalBio.textContent = '';
+            
+            // Show modal immediately
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            try {
+                // Load image
+                const imageLoaded = await loadMemberImage(member.imageLink, member.name);
+                
+                // Fill modal with member data
+                modalName.textContent = member.name;
+                modalInstrument.textContent = member.instrument;
+                modalRole.textContent = member.role ? member.role : '';
+                modalBio.textContent = member.bio || 'Biography coming soon...';
+                
+                // If no image loaded, ensure proper styling
+                if (!imageLoaded && member.imageLink) {
+                    console.warn(`Could not load image for ${member.name}: ${member.imageLink}`);
+                }
+            } catch (error) {
+                console.error('Error loading member data:', error);
+                modalName.textContent = member.name;
+                modalInstrument.textContent = member.instrument;
+                modalBio.textContent = 'Error loading biography. Please try again.';
+            }
+        });
+    });
+    
+    // Close modal when clicking X
+    closeBtn.addEventListener('click', closeModal);
+    
+    // Close modal when clicking outside content
+    modal.addEventListener('click', function(e) {
+        if (e.target === this || e.target.classList.contains('bio-modal-overlay')) {
+            closeModal();
+        }
+    });
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+    
+    function closeModal() {
+        modal.classList.remove('active');
+        // Wait for animation to complete before resetting
+        setTimeout(() => {
+            document.body.style.overflow = '';
+            // Reset modal content
+            modalImage.src = '';
+            imageContainer.classList.remove('has-image');
+        }, 300);
+    }
+}
 // Initialize Everything
 document.addEventListener('DOMContentLoaded', () => {
     renderMusicians();
@@ -322,6 +511,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupHeaderScroll();
     setupYouTubeThumbnails();
     setupGalleryLightbox();
+    setupMemberBiographies();
     
     console.log('Devils Dectet website initialized successfully!');
 });
