@@ -54,7 +54,7 @@ const musiciansData = [
         name: "Brandon Kim", 
         instrument: "Violin", 
         imageLink: "images/IMG_5604.JPG",
-        bio: ""
+        bio: "I’m Brandon Kim, a junior at Hinsdale Central High School. I started playing the violin when I was eleven years old, and have fallen in love ever since, and have represented the school in ILMEA District and All-State Orchestras. When I am not playing the violin, I enjoy running on our school’s varsity track team, and cooking different types of foods with my mother."
     },
     { 
         name: "Oliver Clary", 
