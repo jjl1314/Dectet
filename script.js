@@ -36,7 +36,7 @@ const musiciansData = [
         name: "Vincent Lan", 
         instrument: "Violin", 
         imageLink: "images/IMG_5578.JPG",
-        bio: "I am a young violinist, violist, and composer. I have received numerous accolades since he began learning to play at the age of 4. These include placing first in the Granquist Music Competition and IMA State Contest multiple times. I have also been a member of the Chicago Youth Symphony Orchestras, and am the concertmaster of Hinsdale Central High School's Philharmonic Orchestra."
+        bio: "I am a young violinist, violist, and composer. I have received numerous accolades since I began learning to play at the age of 4. These include placing first in the Granquist Music Competition and IMA State Contest multiple times. I have also been a member of the Chicago Youth Symphony Orchestras, and am the concertmaster of Hinsdale Central High School's Philharmonic Orchestra."
     },
     { 
         name: "Steven Zhao", 
