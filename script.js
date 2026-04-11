@@ -1,5 +1,10 @@
 'use strict';
 
+/* ═══════════════════════════════════════════════════════════════
+   DEVILS DECTET — script.js
+   Modular JS · GSAP + ScrollTrigger · Canvas Waves · VanillaTilt
+═══════════════════════════════════════════════════════════════ */
+
 /* ── Data ────────────────────────────────────────────────────── */
 const musiciansData = [
   {
@@ -66,352 +71,669 @@ const musiciansData = [
   }
 ];
 
-/* ── Render Members ──────────────────────────────────────────── */
-function renderMusicians() {
-  const grid = document.getElementById('membersGrid');
-  if (!grid) return;
+/* ═══════════════════════════════════════════════════════════════
+   MODULE: Hero Canvas (Animated Sound Waves)
+═══════════════════════════════════════════════════════════════ */
+const HeroCanvas = {
+  canvas: null,
+  ctx: null,
+  raf: null,
+  W: 0,
+  H: 0,
+  mouse: { x: 0.5, y: 0.5 }, // normalised 0–1
 
-  grid.innerHTML = musiciansData.map((m, i) => {
-    // Check if member has Founder role (Isaiah or Jason)
-    const isFounder = m.role === 'Founder';
-    
-    const imgMarkup = m.imageLink
-      ? `<img src="${m.imageLink}" alt="Photo of ${m.name}" loading="lazy">`
-      : '';
+  // Wave definitions: amp, freq, phase, speed, color, yBias
+  waves: [
+    { amp: 38,  freq: 0.0070, phase: 0,   speed: 0.013, alpha: 0.16, hue: 'crimson', yBias: 0   },
+    { amp: 22,  freq: 0.0110, phase: 1.5, speed: 0.020, alpha: 0.10, hue: 'gold',    yBias: 38  },
+    { amp: 52,  freq: 0.0042, phase: 3.1, speed: 0.007, alpha: 0.08, hue: 'crimson', yBias: -22 },
+    { amp: 14,  freq: 0.0170, phase: 5.0, speed: 0.028, alpha: 0.05, hue: 'cream',   yBias: 16  },
+  ],
 
-    // Only generate role badge HTML if isFounder is true
-    const roleBadgeHTML = isFounder ? '<span class="role-badge">FOUNDER</span>' : '';
+  _color(hue, alpha) {
+    const map = {
+      crimson: `rgba(185, 28, 60, ${alpha})`,
+      gold:    `rgba(201, 150, 63, ${alpha})`,
+      cream:   `rgba(242, 237, 228, ${alpha})`,
+    };
+    return map[hue] || `rgba(255,255,255,${alpha})`;
+  },
 
-    return `
-      <div class="member-card reveal" role="listitem" tabindex="0"
-           data-member-index="${i}" ${isFounder ? `data-role="founder"` : ''}
-           aria-label="View bio for ${m.name}, ${m.instrument}"
-           style="--reveal-delay:${i * 0.06}s">
-        <div class="member-photo">
-          ${imgMarkup}
-          ${roleBadgeHTML}
-          <div class="member-hover-hint" aria-hidden="true">
-            <span class="member-hint-text">View Bio</span>
+  resize() {
+    this.W = this.canvas.width  = window.innerWidth;
+    this.H = this.canvas.height = window.innerHeight;
+  },
+
+  draw() {
+    const { ctx, W, H, waves, mouse } = this;
+    ctx.clearRect(0, 0, W, H);
+
+    // Centre Y sits in the lower-middle of the hero for elegance
+    const cy = H * 0.64;
+    const mx = mouse.x - 0.5; // -0.5 → +0.5 normalised mouse offset
+
+    waves.forEach(w => {
+      w.phase += w.speed;
+
+      // Gradient fade at edges for seamless blending
+      const grad = ctx.createLinearGradient(0, 0, W, 0);
+      const col  = this._color(w.hue, w.alpha);
+      grad.addColorStop(0,    'transparent');
+      grad.addColorStop(0.12, col);
+      grad.addColorStop(0.88, col);
+      grad.addColorStop(1,    'transparent');
+
+      ctx.beginPath();
+      ctx.strokeStyle = grad;
+      ctx.lineWidth   = 1.4;
+
+      for (let x = 0; x <= W; x += 2) {
+        // Subtle mouse influence: wave shifts slightly with horizontal mouse
+        const mouseNudge = Math.sin(x / W * Math.PI) * mx * 18;
+        const y = cy + w.yBias + Math.sin(x * w.freq + w.phase) * w.amp + mouseNudge;
+        x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    });
+  },
+
+  animate() {
+    this.draw();
+    this.raf = requestAnimationFrame(() => this.animate());
+  },
+
+  init() {
+    this.canvas = document.getElementById('heroCanvas');
+    if (!this.canvas) return;
+
+    // Skip heavy canvas if reduced motion preferred
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      this.canvas.style.display = 'none';
+      return;
+    }
+
+    this.ctx = this.canvas.getContext('2d');
+    this.resize();
+
+    window.addEventListener('resize', () => this.resize(), { passive: true });
+    window.addEventListener('mousemove', e => {
+      this.mouse.x = e.clientX / window.innerWidth;
+      this.mouse.y = e.clientY / window.innerHeight;
+    }, { passive: true });
+
+    this.animate();
+  },
+
+  destroy() {
+    if (this.raf) cancelAnimationFrame(this.raf);
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   MODULE: Members — render + bio modal
+═══════════════════════════════════════════════════════════════ */
+const Members = {
+  render() {
+    const grid = document.getElementById('membersGrid');
+    if (!grid) return;
+
+    grid.innerHTML = musiciansData.map((m, i) => {
+      const isFounder = m.role === 'Founder';
+      const imgMarkup = m.imageLink
+        ? `<img src="${m.imageLink}" alt="Photo of ${m.name}" loading="lazy">`
+        : '';
+      const badgeHTML = isFounder ? `<span class="role-badge">Founder</span>` : '';
+
+      return `
+        <div class="member-card" role="listitem" tabindex="0"
+             data-member-index="${i}"
+             aria-label="View bio for ${m.name}, ${m.instrument}">
+          <div class="member-photo">
+            ${imgMarkup}
+            ${badgeHTML}
+            <div class="member-hover-hint" aria-hidden="true">
+              <span class="member-hint-text">View Bio</span>
+            </div>
+          </div>
+          <div class="member-info">
+            <h3>${m.name}</h3>
+            <p>${m.instrument}</p>
           </div>
         </div>
-        <div class="member-info">
-          <h3>${m.name}</h3>
-          <p>${m.instrument}</p>
+      `.trim();
+    }).join('');
+  },
+
+  setupModal() {
+    // Inject modal HTML once
+    document.body.insertAdjacentHTML('beforeend', `
+      <div class="bio-modal" role="dialog" aria-modal="true" aria-labelledby="bioModalName" id="bioModal">
+        <div class="bio-modal-overlay"></div>
+        <div class="bio-modal-content">
+          <button class="bio-modal-close" aria-label="Close biography">&times;</button>
+          <div class="bio-img-side" id="bioImgSide">
+            <img id="bioModalImage" src="" alt="">
+          </div>
+          <div class="bio-text-side">
+            <h2 class="bio-name" id="bioModalName"></h2>
+            <p class="bio-instrument" id="bioModalInstrument"></p>
+            <p class="bio-role-tag" id="bioModalRole" hidden></p>
+            <div class="bio-rule"></div>
+            <p class="bio-text" id="bioModalBio"></p>
+          </div>
         </div>
       </div>
-    `.trim();
-  }).join('');
+    `);
 
-  // Stagger the card reveals
-  grid.querySelectorAll('.member-card').forEach((card, i) => {
-    card.style.transitionDelay = `${i * 0.06}s`;
-  });
-}
+    const modal       = document.getElementById('bioModal');
+    const imgEl       = document.getElementById('bioModalImage');
+    const imgSide     = document.getElementById('bioImgSide');
+    const nameEl      = document.getElementById('bioModalName');
+    const instrEl     = document.getElementById('bioModalInstrument');
+    const roleEl      = document.getElementById('bioModalRole');
+    const bioEl       = document.getElementById('bioModalBio');
+    const closeBtn    = modal.querySelector('.bio-modal-close');
+    const overlay     = modal.querySelector('.bio-modal-overlay');
+    let prevFocus     = null;
 
-/* ── Bio Modal ───────────────────────────────────────────────── */
-function setupMemberBiographies() {
-  // Inject modal HTML
-  document.body.insertAdjacentHTML('beforeend', `
-    <div class="bio-modal" role="dialog" aria-modal="true" aria-labelledby="bio-modal-name" id="bioModal">
-      <div class="bio-modal-overlay"></div>
-      <div class="bio-modal-content">
-        <button class="bio-modal-close" aria-label="Close biography">&times;</button>
-        <div class="bio-img-side" id="bioImgSide">
-          <img id="bioModalImage" src="" alt="">
-          <div class="bio-img-fade"></div>
-        </div>
-        <div class="bio-text-side">
-          <h2 class="bio-name" id="bioModalName"></h2>
-          <p class="bio-instrument" id="bioModalInstrument"></p>
-          <p class="bio-role-tag" id="bioModalRole" hidden></p>
-          <div class="bio-rule"></div>
-          <p class="bio-text" id="bioModalBio"></p>
-        </div>
-      </div>
-    </div>
-  `);
+    const open = (member) => {
+      prevFocus = document.activeElement;
+      nameEl.textContent  = member.name;
+      instrEl.textContent = member.instrument;
+      bioEl.textContent   = member.bio || 'Biography coming soon…';
 
-  const modal           = document.getElementById('bioModal');
-  const imgEl           = document.getElementById('bioModalImage');
-  const imgSide         = document.getElementById('bioImgSide');
-  const nameEl          = document.getElementById('bioModalName');
-  const instrumentEl    = document.getElementById('bioModalInstrument');
-  const roleEl          = document.getElementById('bioModalRole');
-  const bioEl           = document.getElementById('bioModalBio');
-  const closeBtn        = modal.querySelector('.bio-modal-close');
-  const overlay         = modal.querySelector('.bio-modal-overlay');
-  let previousFocus     = null;
-
-  function openModal(member) {
-    previousFocus = document.activeElement;
-    nameEl.textContent       = member.name;
-    instrumentEl.textContent = member.instrument;
-    bioEl.textContent        = member.bio || 'Biography coming soon…';
-
-    if (member.role) {
-      roleEl.textContent = member.role;
-      roleEl.hidden = false;
-    } else {
-      roleEl.hidden = true;
-    }
-
-    // Load image
-    if (member.imageLink) {
-      const probe = new Image();
-      probe.onload = () => {
-        imgEl.src = member.imageLink;
-        imgEl.alt = `Photo of ${member.name}`;
-        imgSide.style.display = '';
-      };
-      probe.onerror = () => { imgSide.style.display = 'none'; };
-      probe.src = member.imageLink;
-    } else {
-      imgSide.style.display = 'none';
-    }
-
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
-    closeBtn.focus();
-  }
-
-  function closeModal() {
-    modal.classList.remove('active');
-    document.body.style.overflow = '';
-    setTimeout(() => {
-      imgEl.src = '';
-      imgEl.alt = '';
-      imgSide.style.display = '';
-    }, 350);
-    if (previousFocus) previousFocus.focus();
-  }
-
-  // Attach click events (delegated, runs after cards render)
-  document.addEventListener('click', e => {
-    const card = e.target.closest('.member-card');
-    if (card) {
-      const idx = parseInt(card.dataset.memberIndex, 10);
-      if (!isNaN(idx) && musiciansData[idx]) openModal(musiciansData[idx]);
-    }
-  });
-
-  // Keyboard: Enter / Space on card
-  document.addEventListener('keydown', e => {
-    if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('member-card')) {
-      e.preventDefault();
-      const idx = parseInt(e.target.dataset.memberIndex, 10);
-      if (!isNaN(idx) && musiciansData[idx]) openModal(musiciansData[idx]);
-    }
-    if (e.key === 'Escape' && modal.classList.contains('active')) closeModal();
-  });
-
-  closeBtn.addEventListener('click', closeModal);
-  overlay.addEventListener('click', closeModal);
-}
-
-/* ── Header scroll / hide ────────────────────────────────────── */
-function setupHeader() {
-  const header = document.getElementById('site-header');
-  let lastY = 0;
-  let ticking = false;
-
-  function update() {
-    const y = window.scrollY;
-
-    if (y > 60) {
-      header.classList.add('scrolled');
-      if (y > lastY + 2 && !header.classList.contains('nav-open')) {
-        header.classList.add('hidden');
-      } else if (y < lastY - 2) {
-        header.classList.remove('hidden');
+      if (member.role) {
+        roleEl.textContent = member.role;
+        roleEl.hidden = false;
+      } else {
+        roleEl.hidden = true;
       }
-    } else {
-      header.classList.remove('scrolled', 'hidden');
-    }
 
-    lastY = y;
-    ticking = false;
-  }
-
-  window.addEventListener('scroll', () => {
-    if (!ticking) { requestAnimationFrame(update); ticking = true; }
-  }, { passive: true });
-}
-
-/* ── Mobile nav ──────────────────────────────────────────────── */
-function setupMobileNav() {
-  const header    = document.getElementById('site-header');
-  const toggle    = header.querySelector('.menu-toggle');
-  const navLinks  = header.querySelectorAll('nav ul li a');
-  if (!toggle) return;
-
-  toggle.addEventListener('click', () => {
-    const open = header.classList.toggle('nav-open');
-    toggle.setAttribute('aria-expanded', open);
-  });
-
-  navLinks.forEach(link => {
-    link.addEventListener('click', () => {
-      header.classList.remove('nav-open');
-      toggle.setAttribute('aria-expanded', 'false');
-    });
-  });
-}
-
-/* ── Active nav highlight ────────────────────────────────────── */
-function setupActiveNav() {
-  const sections = document.querySelectorAll('section[id]');
-  const links    = document.querySelectorAll('nav ul li a');
-
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        const id = entry.target.id;
-        links.forEach(l => {
-          l.classList.toggle('active', l.getAttribute('href') === `#${id}`);
-        });
+      // Load image with probe
+      if (member.imageLink) {
+        const probe = new Image();
+        probe.onload  = () => { imgEl.src = member.imageLink; imgEl.alt = `Photo of ${member.name}`; imgSide.style.display = ''; };
+        probe.onerror = () => { imgSide.style.display = 'none'; };
+        probe.src = member.imageLink;
+      } else {
+        imgSide.style.display = 'none';
       }
-    });
-  }, { threshold: 0.35 });
 
-  sections.forEach(s => obs.observe(s));
-}
-
-/* ── Smooth scroll ───────────────────────────────────────────── */
-function setupSmoothScroll() {
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', e => {
-      const target = document.querySelector(anchor.getAttribute('href'));
-      if (!target) return;
-      e.preventDefault();
-      const offset = document.getElementById('site-header').offsetHeight;
-      const top    = target.getBoundingClientRect().top + window.scrollY - offset;
-      window.scrollTo({ top, behavior: 'smooth' });
-    });
-  });
-}
-
-/* ── Scroll-reveal (Intersection Observer) ───────────────────── */
-function setupScrollReveal() {
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        obs.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.08, rootMargin: '0px 0px -48px 0px' });
-
-  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
-}
-
-/* ── Hero parallax ───────────────────────────────────────────── */
-function setupHeroParallax() {
-  const bg = document.querySelector('.hero-bg');
-  if (!bg || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-  let ticking = false;
-  window.addEventListener('scroll', () => {
-    if (!ticking) {
-      requestAnimationFrame(() => {
-        const y = window.scrollY;
-        if (y < window.innerHeight * 1.5) {
-          bg.style.transform = `translateY(${y * 0.28}px)`;
-        }
-        ticking = false;
-      });
-      ticking = true;
-    }
-  }, { passive: true });
-}
-
-/* ── YouTube thumbnails ──────────────────────────────────────── */
-function setupYouTubeThumbnails() {
-  document.querySelectorAll('.video-thumb[data-youtube-id]').forEach(el => {
-    const id = el.getAttribute('data-youtube-id').split('&')[0].trim();
-    if (!id) return;
-    const url = `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
-    el.style.backgroundImage    = `url('${url}')`;
-    el.style.backgroundSize     = 'cover';
-    el.style.backgroundPosition = 'center';
-    el.style.backgroundRepeat   = 'no-repeat';
-  });
-}
-
-/* ── Gallery lightbox ────────────────────────────────────────── */
-function setupGalleryLightbox() {
-  document.addEventListener('click', e => {
-    const item = e.target.closest('.gallery-item');
-    if (!item) return;
-
-    const photo = item.querySelector('.gallery-photo');
-    const bgImg = window.getComputedStyle(photo).backgroundImage;
-    const match = bgImg.match(/url\(["']?([^"')]+)["']?\)/);
-    if (!match) return;
-
-    const lightbox = document.createElement('div');
-    lightbox.className = 'lightbox';
-    lightbox.setAttribute('role', 'dialog');
-    lightbox.setAttribute('aria-modal', 'true');
-    lightbox.setAttribute('aria-label', 'Gallery photo');
-    lightbox.innerHTML = `
-      <div class="lightbox-content">
-        <img src="${match[1]}" alt="Gallery photo enlarged">
-        <button class="lightbox-close" aria-label="Close photo">&times;</button>
-      </div>
-    `;
-    document.body.appendChild(lightbox);
-    document.body.style.overflow = 'hidden';
-    lightbox.querySelector('.lightbox-close').focus();
-
-    const close = () => {
-      document.body.removeChild(lightbox);
-      document.body.style.overflow = '';
+      modal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      closeBtn.focus();
     };
 
-    lightbox.querySelector('.lightbox-close').addEventListener('click', close);
-    lightbox.addEventListener('click', e => { if (e.target === lightbox) close(); });
-    document.addEventListener('keydown', function handler(e) {
-      if (e.key === 'Escape') { close(); document.removeEventListener('keydown', handler); }
-    });
-  });
-}
+    const close = () => {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+      setTimeout(() => {
+        imgEl.src = '';
+        imgEl.alt = '';
+        imgSide.style.display = '';
+      }, 380);
+      if (prevFocus) prevFocus.focus();
+    };
 
-/* ── Stagger reveal for member cards ─────────────────────────── */
-function setupMemberStagger() {
-  // After cards render, re-observe them
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        obs.unobserve(entry.target);
+    // Delegated click on member cards
+    document.addEventListener('click', e => {
+      const card = e.target.closest('.member-card');
+      if (!card) return;
+      const idx = parseInt(card.dataset.memberIndex, 10);
+      if (!isNaN(idx) && musiciansData[idx]) open(musiciansData[idx]);
+    });
+
+    // Keyboard: Enter / Space
+    document.addEventListener('keydown', e => {
+      if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('member-card')) {
+        e.preventDefault();
+        const idx = parseInt(e.target.dataset.memberIndex, 10);
+        if (!isNaN(idx) && musiciansData[idx]) open(musiciansData[idx]);
+      }
+      if (e.key === 'Escape' && modal.classList.contains('active')) close();
+    });
+
+    closeBtn.addEventListener('click', close);
+    overlay.addEventListener('click', close);
+  },
+
+  initTilt() {
+    // VanillaTilt 3D tilt on member cards — graceful degradation if lib absent
+    if (typeof VanillaTilt === 'undefined') return;
+    VanillaTilt.init(document.querySelectorAll('.member-card'), {
+      max: 7,
+      speed: 500,
+      glare: true,
+      'max-glare': 0.06,
+      scale: 1.02,
+      perspective: 800,
+    });
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   MODULE: Navigation
+═══════════════════════════════════════════════════════════════ */
+const Navigation = {
+  header: null,
+  lastY: 0,
+  ticking: false,
+
+  init() {
+    this.header = document.getElementById('site-header');
+    if (!this.header) return;
+
+    this._setupScroll();
+    this._setupMobileNav();
+    this._setupActiveHighlight();
+    this._setupSmoothScroll();
+  },
+
+  _setupScroll() {
+    window.addEventListener('scroll', () => {
+      if (!this.ticking) {
+        requestAnimationFrame(() => this._onScroll());
+        this.ticking = true;
+      }
+    }, { passive: true });
+  },
+
+  _onScroll() {
+    const y = window.scrollY;
+    if (y > 60) {
+      this.header.classList.add('scrolled');
+      if (y > this.lastY + 3 && !this.header.classList.contains('nav-open')) {
+        this.header.classList.add('hidden');
+      } else if (y < this.lastY - 3) {
+        this.header.classList.remove('hidden');
+      }
+    } else {
+      this.header.classList.remove('scrolled', 'hidden');
+    }
+    this.lastY = y;
+    this.ticking = false;
+  },
+
+  _setupMobileNav() {
+    const toggle   = this.header.querySelector('.menu-toggle');
+    const navLinks = this.header.querySelectorAll('nav ul li a');
+    if (!toggle) return;
+
+    toggle.addEventListener('click', () => {
+      const open = this.header.classList.toggle('nav-open');
+      toggle.setAttribute('aria-expanded', open);
+    });
+
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        this.header.classList.remove('nav-open');
+        toggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+  },
+
+  _setupActiveHighlight() {
+    const sections = document.querySelectorAll('section[id]');
+    const links    = document.querySelectorAll('nav ul li a');
+
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          links.forEach(l => {
+            l.classList.toggle('active', l.getAttribute('href') === `#${id}`);
+          });
+        }
+      });
+    }, { threshold: 0.3 });
+
+    sections.forEach(s => obs.observe(s));
+  },
+
+  _setupSmoothScroll() {
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', e => {
+        const target = document.querySelector(anchor.getAttribute('href'));
+        if (!target) return;
+        e.preventDefault();
+        const offset = this.header ? this.header.offsetHeight : 72;
+        const top = target.getBoundingClientRect().top + window.scrollY - offset;
+        window.scrollTo({ top, behavior: 'smooth' });
+      });
+    });
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   MODULE: GSAP Animations
+═══════════════════════════════════════════════════════════════ */
+const Animations = {
+  init() {
+    gsap.registerPlugin(ScrollTrigger);
+
+    this._heroTimeline();
+    this._sectionHeaders();
+    this._memberCards();
+    this._videoCards();
+    this._galleryItems();
+    this._contactCards();
+    this._featuredSection();
+    this._heroParallax();
+    this._scrollHint();
+  },
+
+  /* ── Hero entrance (runs after preloader) ─────────────────── */
+  _heroTimeline() {
+    const tl = gsap.timeline({ delay: 0.2 });
+
+    tl.fromTo('.hero-eyebrow',
+      { y: 22, opacity: 0 },
+      { y: 0,  opacity: 1, duration: 0.85, ease: 'power3.out' }
+    )
+    .fromTo('.word',
+      { y: '110%', opacity: 0 },
+      { y: '0%',   opacity: 1, stagger: 0.14, duration: 1.1, ease: 'power4.out' },
+      '-=0.45'
+    )
+    .fromTo('.hero-ornament',
+      { opacity: 0, scaleX: 0.6 },
+      { opacity: 1, scaleX: 1,   duration: 0.7, ease: 'power2.out' },
+      '-=0.3'
+    )
+    .fromTo('.hero-sub',
+      { y: 24, opacity: 0 },
+      { y: 0,  opacity: 1, duration: 0.9, ease: 'power3.out' },
+      '-=0.4'
+    )
+    .fromTo('.hero-cta',
+      { y: 20, opacity: 0 },
+      { y: 0,  opacity: 1, duration: 0.7, ease: 'power3.out' },
+      '-=0.5'
+    );
+
+    return tl;
+  },
+
+  /* ── Scroll hint pulse ────────────────────────────────────── */
+  _scrollHint() {
+    gsap.fromTo('.scroll-hint',
+      { opacity: 0, y: 10 },
+      { opacity: 1, y: 0, duration: 0.8, delay: 2.2, ease: 'power2.out' }
+    );
+
+    // Fade out as user scrolls
+    ScrollTrigger.create({
+      trigger: '.hero-section',
+      start: 'top top',
+      end: '30% top',
+      onUpdate: self => {
+        gsap.set('.scroll-hint', { opacity: 1 - self.progress * 2 });
       }
     });
-  }, { threshold: 0.08, rootMargin: '0px 0px -32px 0px' });
+  },
 
-  document.querySelectorAll('.member-card').forEach(el => obs.observe(el));
-}
-
-/* ── Init ────────────────────────────────────────────────────── */
-document.addEventListener('DOMContentLoaded', () => {
-  renderMusicians();
-  setupMemberBiographies();
-  setupHeader();
-  setupMobileNav();
-  setupActiveNav();
-  setupSmoothScroll();
-  setupScrollReveal();
-  setupHeroParallax();
-  setupYouTubeThumbnails();
-  setupGalleryLightbox();
-  setupMemberStagger();
-
-  // Kick reveal for elements already in view on load
-  setTimeout(() => {
-    document.querySelectorAll('.reveal:not(.visible)').forEach(el => {
-      const rect = el.getBoundingClientRect();
-      if (rect.top < window.innerHeight - 48) el.classList.add('visible');
+  /* ── Section headers stagger in ──────────────────────────── */
+  _sectionHeaders() {
+    document.querySelectorAll('.section-header').forEach(header => {
+      const children = header.querySelectorAll('.section-eyebrow, .section-title, .section-subtitle');
+      gsap.fromTo(children,
+        { y: 40, opacity: 0 },
+        {
+          y: 0, opacity: 1,
+          stagger: 0.14,
+          duration: 1.0,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: header,
+            start: 'top 82%',
+          }
+        }
+      );
     });
-  }, 120);
+  },
 
-  console.log('%cDevils Dectet ♪', 'color:#B91C3C;font-size:14px;font-weight:bold;');
+  /* ── Member cards staggered reveal ───────────────────────── */
+  _memberCards() {
+    gsap.fromTo('.member-card',
+      { y: 60, opacity: 0, scale: 0.96 },
+      {
+        y: 0, opacity: 1, scale: 1,
+        stagger: { each: 0.07, from: 'start' },
+        duration: 0.85,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '#membersGrid',
+          start: 'top 85%',
+        }
+      }
+    );
+  },
+
+  /* ── Video cards ─────────────────────────────────────────── */
+  _videoCards() {
+    gsap.fromTo('.video-card',
+      { y: 50, opacity: 0 },
+      {
+        y: 0, opacity: 1,
+        stagger: 0.12,
+        duration: 0.9,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '.videos-grid',
+          start: 'top 82%',
+        }
+      }
+    );
+
+    gsap.fromTo('.yt-cta-wrap',
+      { y: 24, opacity: 0 },
+      {
+        y: 0, opacity: 1,
+        duration: 0.8,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '.yt-cta-wrap',
+          start: 'top 90%',
+        }
+      }
+    );
+  },
+
+  /* ── Gallery items ───────────────────────────────────────── */
+  _galleryItems() {
+    gsap.fromTo('.gallery-item',
+      { y: 40, opacity: 0, scale: 0.97 },
+      {
+        y: 0, opacity: 1, scale: 1,
+        stagger: { each: 0.06, from: 'random' },
+        duration: 0.85,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: '.gallery-grid',
+          start: 'top 82%',
+        }
+      }
+    );
+  },
+
+  /* ── Contact cards ───────────────────────────────────────── */
+  _contactCards() {
+    gsap.fromTo('.contact-intro',
+      { y: 30, opacity: 0 },
+      {
+        y: 0, opacity: 1,
+        duration: 0.9,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: '.contact-intro', start: 'top 85%' }
+      }
+    );
+
+    gsap.fromTo('.contact-card',
+      { y: 40, opacity: 0 },
+      {
+        y: 0, opacity: 1,
+        stagger: 0.14,
+        duration: 0.85,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: '.contact-cards', start: 'top 85%' }
+      }
+    );
+  },
+
+  /* ── Featured section ─────────────────────────────────────── */
+  _featuredSection() {
+    gsap.fromTo('.featured-wrap',
+      { y: 50, opacity: 0 },
+      {
+        y: 0, opacity: 1,
+        duration: 1.0,
+        ease: 'power3.out',
+        scrollTrigger: { trigger: '.featured-wrap', start: 'top 82%' }
+      }
+    );
+  },
+
+  /* ── Hero background parallax ─────────────────────────────── */
+  _heroParallax() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    gsap.to('.hero-bg', {
+      yPercent: 28,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: '.hero-section',
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true,
+      }
+    });
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   MODULE: Magnetic Buttons
+═══════════════════════════════════════════════════════════════ */
+const MagneticButtons = {
+  init() {
+    document.querySelectorAll('.magnetic-btn').forEach(btn => {
+      btn.addEventListener('mousemove', e => {
+        const rect   = btn.getBoundingClientRect();
+        const cx     = rect.left + rect.width  / 2;
+        const cy     = rect.top  + rect.height / 2;
+        const dx     = e.clientX - cx;
+        const dy     = e.clientY - cy;
+        gsap.to(btn, {
+          x: dx * 0.28,
+          y: dy * 0.28,
+          duration: 0.4,
+          ease: 'power3.out'
+        });
+      });
+      btn.addEventListener('mouseleave', () => {
+        gsap.to(btn, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1, 0.4)' });
+      });
+    });
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   MODULE: YouTube Thumbnails
+═══════════════════════════════════════════════════════════════ */
+const YouTubeThumbs = {
+  init() {
+    document.querySelectorAll('.video-thumb[data-youtube-id]').forEach(el => {
+      const id = el.getAttribute('data-youtube-id').split('&')[0].trim();
+      if (!id) return;
+      el.style.backgroundImage    = `url('https://img.youtube.com/vi/${id}/hqdefault.jpg')`;
+      el.style.backgroundSize     = 'cover';
+      el.style.backgroundPosition = 'center';
+    });
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   MODULE: Gallery Lightbox
+═══════════════════════════════════════════════════════════════ */
+const Gallery = {
+  init() {
+    document.addEventListener('click', e => {
+      const item = e.target.closest('.gallery-item');
+      if (!item || item.classList.contains('gallery-item--soon')) return;
+
+      const photo = item.querySelector('.gallery-photo');
+      const bgImg = window.getComputedStyle(photo).backgroundImage;
+      const match = bgImg.match(/url\(["']?([^"')]+)["']?\)/);
+      if (!match) return;
+
+      const box = document.createElement('div');
+      box.className = 'lightbox';
+      box.setAttribute('role', 'dialog');
+      box.setAttribute('aria-modal', 'true');
+      box.setAttribute('aria-label', 'Gallery image');
+      box.innerHTML = `
+        <div class="lightbox-content">
+          <img src="${match[1]}" alt="Gallery photo enlarged">
+        </div>
+      `;
+      document.body.appendChild(box);
+      document.body.style.overflow = 'hidden';
+      // box.querySelector('.lightbox-close').focus();
+
+      const close = () => {
+        gsap.to(box, {
+          opacity: 0, duration: 0.22,
+          onComplete: () => {
+            document.body.removeChild(box);
+            document.body.style.overflow = '';
+          }
+        });
+      };
+
+      // box.querySelector('.lightbox-close').addEventListener('click', close);
+      box.addEventListener('click', e => { if (e.target === box) close(); });
+
+      const keyHandler = e => {
+        if (e.key === 'Escape') { close(); document.removeEventListener('keydown', keyHandler); }
+      };
+      document.addEventListener('keydown', keyHandler);
+    });
+  }
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   INIT — orchestrate all modules
+═══════════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+
+  // 2. Start canvas — independent of page load
+  HeroCanvas.init();
+
+  // 3. Render members, set up modal + 3D tilt
+  Members.render();
+  Members.setupModal();
+
+  // 4. YouTube thumbnails (no network wait needed for bg-image)
+  YouTubeThumbs.init();
+
+  // 5. Gallery lightbox
+  Gallery.init();
+
+  // 7. Navigation
+  Navigation.init();
+
+  // When everything is loaded, complete preloader then kick off GSAP
+    window.addEventListener('load', () => {
+    Animations.init();
+    Members.initTilt();
+    MagneticButtons.init();
+  });
+
+  // Fallback: if 'load' already fired
+  if (document.readyState === 'complete') {
+    Animations.init();
+    Members.initTilt();
+    MagneticButtons.init();
+  }
+
+  console.log('%cDevils Dectet ♪', 'color:#B91C3C;font-size:16px;font-weight:bold;font-family:Georgia,serif;');
 });

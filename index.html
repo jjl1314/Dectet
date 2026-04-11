@@ -8,35 +8,35 @@
   <link rel="icon" type="image/x-icon" href="images/favicon.jpg">
   <link rel="apple-touch-icon" href="images/favicon.jpg">
   <meta property="og:title" content="Devils Dectet - Student Chamber Ensemble">
-  <meta property="og:description"
-    content="A passionate chamber ensemble dedicated to bringing classical and contemporary music to our community through collaboration, creativity, and unforgettable performances.">
+  <meta property="og:description" content="A passionate chamber ensemble dedicated to bringing classical and contemporary music to our community through collaboration, creativity, and unforgettable performances.">
   <meta property="og:image" content="https://yourwebsite.com/images/favicon.jpg">
   <meta property="og:url" content="https://yourwebsite.com">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Devils Dectet">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Devils Dectet - Student Chamber Ensemble">
-  <meta name="twitter:description"
-    content="A passionate chamber ensemble dedicated to bringing classical and contemporary music to our community.">
+  <meta name="twitter:description" content="A passionate chamber ensemble dedicated to bringing classical and contemporary music to our community.">
   <meta name="twitter:image" content="https://yourwebsite.com/images/favicon.jpg">
-  <meta name="description"
-    content="Devils Dectet is a student-led chamber ensemble committed to sharing the beauty and power of ensemble music with schools and local audiences.">
+  <meta name="description" content="Devils Dectet is a student-led chamber ensemble committed to sharing the beauty and power of ensemble music with schools and local audiences.">
 
+  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Outfit:wght@300;400;500;600;700&display=swap"
-    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+  <!-- Styles -->
   <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
 
-  <!-- Grain texture overlay -->
+  <!-- ─── Grain Overlay ─────────────────────────────────────── -->
   <div class="grain-overlay" aria-hidden="true"></div>
 
-  <!-- Navigation -->
+  <!-- ─── Navigation ────────────────────────────────────────── -->
   <header id="site-header">
     <div class="container nav-content">
       <a href="#home" class="logo" aria-label="Devils Dectet home">
@@ -61,13 +61,15 @@
     </div>
   </header>
 
-  <!-- Hero -->
+  <!-- ─── Hero ──────────────────────────────────────────────── -->
   <section id="home" class="hero-section" aria-label="Welcome">
     <div class="hero-bg" role="img" aria-label="Devils Dectet ensemble performance"></div>
+    <!-- Animated sound-wave canvas -->
+    <canvas id="heroCanvas" aria-hidden="true"></canvas>
     <div class="hero-content container">
       <p class="hero-eyebrow">Hinsdale, Illinois</p>
       <h1 class="hero-title">
-        <span class="word" style="--d:0.5s">Devils</span><span class="word italic-word" style="--d:0.68s">Dectet</span>
+        <span class="word">Devils</span><span class="word italic-word">Dectet</span>
       </h1>
       <div class="hero-ornament" aria-hidden="true">
         <span class="ornament-line"></span>
@@ -77,42 +79,44 @@
       <p class="hero-sub">
         Devils Dectet is a not-for-profit student-led ensemble committed to sharing the beauty and power of
         ensemble music with schools and local audiences. We believe music is a universal language that connects
-        people, inspires creativity, and enriches communities.
+        people and enriches communities.
       </p>
       <div class="hero-cta">
-        <a href="#performances" class="btn btn--outline">
+        <a href="#performances" class="btn btn--outline magnetic-btn">
           View Performances <span class="btn-arrow">→</span>
         </a>
       </div>
     </div>
   </section>
 
-  <!-- Members -->
+  <!-- ─── Members ───────────────────────────────────────────── -->
   <section id="members" class="section members-section" aria-labelledby="members-title">
     <div class="container">
-      <div class="section-header reveal">
-        <h2 class="section-title" id="members-title">Meet Our Ensemble</h2>
+      <div class="section-header">
+        <h2 class="section-title" id="members-title">Meet Our Members</h2>
         <p class="section-subtitle">Ten dedicated musicians bringing the strings to life</p>
       </div>
       <div class="members-grid" id="membersGrid" role="list" aria-label="Ensemble members"></div>
     </div>
   </section>
 
-  <!-- Performances -->
+  <!-- ─── Performances ──────────────────────────────────────── -->
   <section id="performances" class="section performances-section" aria-labelledby="perf-title">
     <div class="container">
-      <div class="section-header reveal">
-
+      <div class="section-header">
         <h2 class="section-title" id="perf-title">Past Performances</h2>
-        <p class="section-subtitle">Highlights from our recent performances</p>
+        <p class="section-subtitle">Highlights from our recent shows</p>
       </div>
       <div class="videos-grid">
-        <article class="video-card reveal" data-aos="zoom-in">
+
+        <article class="video-card">
           <a href="https://www.youtube.com/watch?v=FfyFiKXF_Vs" target="_blank" rel="noopener noreferrer"
             class="video-link" aria-label="Watch Edelweiss - March 2025 at Hinsdale Central">
             <div class="video-thumb" data-youtube-id="FfyFiKXF_Vs">
               <div class="video-thumb-overlay"></div>
-              <div class="play-btn" aria-hidden="true">&#9654;</div>
+              <div class="play-btn" aria-hidden="true">
+                <div class="play-icon">&#9654;</div>
+              </div>
             </div>
             <div class="video-meta">
               <p class="video-date">March 2025 &bull; Hinsdale Central</p>
@@ -120,12 +124,15 @@
             </div>
           </a>
         </article>
-        <article class="video-card reveal reveal-delay-2" data-aos="zoom-in">
+
+        <article class="video-card">
           <a href="https://www.youtube.com/watch?v=NpXnhpgza7k" target="_blank" rel="noopener noreferrer"
             class="video-link" aria-label="Watch Happy Holidays - December 2025 at Anthem Memory Care">
             <div class="video-thumb" data-youtube-id="NpXnhpgza7k">
               <div class="video-thumb-overlay"></div>
-              <div class="play-btn" aria-hidden="true">&#9654;</div>
+              <div class="play-btn" aria-hidden="true">
+                <div class="play-icon">&#9654;</div>
+              </div>
             </div>
             <div class="video-meta">
               <p class="video-date">December 2025 &bull; Anthem Memory Care</p>
@@ -133,12 +140,15 @@
             </div>
           </a>
         </article>
-        <article class="video-card reveal reveal-delay-3" data-aos="zoom-in">
+
+        <article class="video-card">
           <a href="https://www.youtube.com/watch?v=ZaEwqSNf244" target="_blank" rel="noopener noreferrer"
             class="video-link" aria-label="Watch Postcards From Russia - February 2026 at The Sheridan">
             <div class="video-thumb" data-youtube-id="ZaEwqSNf244">
               <div class="video-thumb-overlay"></div>
-              <div class="play-btn" aria-hidden="true">&#9654;</div>
+              <div class="play-btn" aria-hidden="true">
+                <div class="play-icon">&#9654;</div>
+              </div>
             </div>
             <div class="video-meta">
               <p class="video-date">February 2026 &bull; The Sheridan</p>
@@ -146,9 +156,10 @@
             </div>
           </a>
         </article>
+
       </div>
     </div>
-    <div class="yt-cta-wrap reveal">
+    <div class="yt-cta-wrap">
       <a href="https://www.youtube.com/@DevilsDectet" target="_blank" rel="noopener noreferrer" class="yt-btn"
         aria-label="Visit our YouTube channel">
         <i class="fab fa-youtube" aria-hidden="true"></i> Visit Our Channel
@@ -156,111 +167,72 @@
     </div>
   </section>
 
-  <!-- Gallery -->
+  <!-- ─── Gallery ───────────────────────────────────────────── -->
   <section id="gallery" class="section gallery-section" aria-labelledby="gallery-title">
     <div class="container">
-      <div class="section-header reveal">
+      <div class="section-header">
         <h2 class="section-title" id="gallery-title">Gallery</h2>
       </div>
       <div class="gallery-grid" role="list">
-        <div class="gallery-item reveal" role="listitem">
-          <div class="gallery-photo" style="background-image:url('images/gallery/IMG_5983.jpg')" role="img"
-            aria-label="The Sheridan performance">
-            <div class="gallery-overlay">
-              <p class="gallery-venue">The Sheridan</p>
-            </div>
+
+        <div class="gallery-item" role="listitem">
+          <div class="gallery-photo" style="background-image:url('images/gallery/IMG_5983.jpg')" role="img" aria-label="The Sheridan performance">
+            <div class="gallery-overlay"><p class="gallery-venue">The Sheridan</p></div>
           </div>
         </div>
-        <div class="gallery-item reveal reveal-delay-1" role="listitem">
-          <div class="gallery-photo" style="background-image:url('images/gallery/IMG_5984.jpg')" role="img"
-            aria-label="The Birches performance">
-            <div class="gallery-overlay">
-              <p class="gallery-venue">The Birches</p>
-            </div>
+        <div class="gallery-item" role="listitem">
+          <div class="gallery-photo" style="background-image:url('images/gallery/IMG_5984.jpg')" role="img" aria-label="The Birches performance">
+            <div class="gallery-overlay"><p class="gallery-venue">The Birches</p></div>
           </div>
         </div>
-        <div class="gallery-item reveal reveal-delay-2" role="listitem">
-          <div class="gallery-photo" style="background-image:url('images/gallery/IMG_5985.jpg')" role="img"
-            aria-label="Eden Vista performance">
-            <div class="gallery-overlay">
-              <p class="gallery-venue">Eden Vista</p>
-            </div>
+        <div class="gallery-item" role="listitem">
+          <div class="gallery-photo" style="background-image:url('images/gallery/IMG_5985.jpg')" role="img" aria-label="Eden Vista performance">
+            <div class="gallery-overlay"><p class="gallery-venue">Eden Vista</p></div>
           </div>
         </div>
-        <div class="gallery-item reveal reveal-delay-3" role="listitem">
-          <div class="gallery-photo" style="background-image:url('images/gallery/IMG_5986.jpg')" role="img"
-            aria-label="Anthem Memory Care performance">
-            <div class="gallery-overlay">
-              <p class="gallery-venue">Anthem Memory Care</p>
-            </div>
+        <div class="gallery-item" role="listitem">
+          <div class="gallery-photo" style="background-image:url('images/gallery/IMG_5986.jpg')" role="img" aria-label="Anthem Memory Care performance">
+            <div class="gallery-overlay"><p class="gallery-venue">Anthem Memory Care</p></div>
           </div>
         </div>
-        <div class="gallery-item reveal reveal-delay-2" role="listitem">
-          <div class="gallery-photo" style="background-image:url('images/gallery/5th.jpg')" role="img"
-            aria-label="The Sheridan performance">
-            <div class="gallery-overlay">
-              <p class="gallery-venue">The Sheridan</p>
-            </div>
+        <div class="gallery-item gallery-item--soon" role="listitem" aria-label="More photos coming soon">
+          <div class="gallery-photo gallery-photo--placeholder">
+            <i class="fas fa-camera" aria-hidden="true"></i>
+            <span>More photos coming soon</span>
           </div>
         </div>
-        <div class="gallery-item reveal reveal-delay-3" role="listitem">
-          <div class="gallery-photo" style="background-image:url('images/gallery/6th.jpg')" role="img"
-            aria-label="UChicago Medicine AdventHealth performance">
-            <div class="gallery-overlay">
-              <p class="gallery-venue">UChicago Medicine AdventHealth</p>
-            </div>
+        <div class="gallery-item" role="listitem">
+          <div class="gallery-photo" style="background-image:url('images/gallery/5th.jpg')" role="img" aria-label="The Sheridan performance">
+            <div class="gallery-overlay"><p class="gallery-venue">The Sheridan</p></div>
           </div>
         </div>
-        <div class="gallery-item reveal reveal-delay-1" role="listitem">
-          <div class="gallery-photo" style="background-image:url('images/gallery/7th.jpg')" role="img"
-            aria-label="Eden Vista performance">
-            <div class="gallery-overlay">
-              <p class="gallery-venue">Eden Vista</p>
-            </div>
+        <div class="gallery-item" role="listitem">
+          <div class="gallery-photo" style="background-image:url('images/gallery/6th.jpg')" role="img" aria-label="UChicago Medicine AdventHealth performance">
+            <div class="gallery-overlay"><p class="gallery-venue">UChicago Medicine AdventHealth</p></div>
           </div>
         </div>
-        <!-- 8th gallery item with CSS placeholder -->
-        <div class="gallery-item reveal reveal-delay-2" role="listitem">
-          <div class="gallery-photo"
-            style="background-color: var(--surface-3); background-image: none; display: flex; align-items: center; justify-content: center;"
-            role="img" aria-label="Coming soon">
-            <div
-              style="font-family: var(--f-sans); font-size: 14px; color: var(--cream-30); letter-spacing: 0.1em; text-transform: uppercase;">
-              Coming Soon</div>
-            <div class="gallery-overlay">
-              <!-- <p class="gallery-venue">Coming Soon</p> -->
-            </div>
+        <div class="gallery-item" role="listitem">
+          <div class="gallery-photo" style="background-image:url('images/gallery/7th.jpg')" role="img" aria-label="Eden Vista performance">
+            <div class="gallery-overlay"><p class="gallery-venue">Eden Vista</p></div>
+          </div>
+        </div>
+        <div class="gallery-item" role="listitem">
+          <div class="gallery-photo" style="background-image:url('images/gallery/8th.jpg')" role="img" aria-label="Beacon Hill performance">
+            <div class="gallery-overlay"><p class="gallery-venue">Beacon Hill</p></div>
           </div>
         </div>
 
-        <!-- 9th gallery item with CSS placeholder -->
-        <div class="gallery-item reveal reveal-delay-3" role="listitem">
-          <div class="gallery-photo"
-            style="background-color: var(--surface-3); background-image: none; display: flex; align-items: center; justify-content: center;"
-            role="img" aria-label="Coming soon">
-            <div
-              style="font-family: var(--f-sans); font-size: 14px; color: var(--cream-30); letter-spacing: 0.1em; text-transform: uppercase;">
-              Coming Soon</div>
-            <div class="gallery-overlay">
-              <!-- <p class="gallery-venue">Coming Soon</p> -->
-            </div>
-          </div>
-        </div>
       </div>
-      <!-- <p class="gallery-note reveal">
-        <i class="fas fa-camera" aria-hidden="true"></i>
-        <span>More photos coming soon!</span>
-      </p> -->
     </div>
   </section>
 
-  <!-- Featured In -->
+  <!-- ─── Featured In ───────────────────────────────────────── -->
   <section id="featured" class="section featured-section" aria-labelledby="featured-title">
     <div class="container">
-      <div class="section-header reveal">
+      <div class="section-header">
         <h2 class="section-title" id="featured-title">Featured In</h2>
       </div>
-      <div class="featured-wrap reveal">
+      <div class="featured-wrap">
         <a href="https://www.thehinsdalean.com/story/2026/02/05/news/central-teens-unite-for-sound-vision/10478.html"
           target="_blank" rel="noopener noreferrer" class="featured-img-link"
           aria-label="Read our feature in The Hinsdalean">
@@ -274,24 +246,24 @@
     </div>
   </section>
 
-  <!-- Contact -->
+  <!-- ─── Contact ───────────────────────────────────────────── -->
   <section id="contact" class="section contact-section" aria-labelledby="contact-title">
     <div class="container">
-      <div class="section-header reveal">
+      <div class="section-header">
         <h2 class="section-title" id="contact-title">Get In Touch</h2>
       </div>
       <div class="contact-wrap">
-        <p class="contact-intro reveal">
-          Interested in booking Devils Dectet for your event for free or collaborating with us? <br>
+        <p class="contact-intro">
+          Interested in booking Devils Dectet for your event for free or collaborating with us?<br>
           We&rsquo;d love to hear from you!
         </p>
         <div class="contact-cards">
-          <div class="contact-card reveal reveal-delay-1">
+          <div class="contact-card">
             <i class="fas fa-envelope contact-icon" aria-hidden="true"></i>
             <p class="contact-label">Email Us</p>
             <a href="mailto:devilsdectet@gmail.com" class="contact-value">devilsdectet@gmail.com</a>
           </div>
-          <div class="contact-card reveal reveal-delay-2">
+          <div class="contact-card">
             <i class="fas fa-map-marker-alt contact-icon" aria-hidden="true"></i>
             <p class="contact-label">Location</p>
             <p class="contact-value-small">Available for performances throughout the region</p>
@@ -301,16 +273,32 @@
     </div>
   </section>
 
-  <!-- Footer -->
+  <!-- ─── Footer ────────────────────────────────────────────── -->
   <footer>
     <div class="container footer-inner">
-      <p class="footer-credit">Designed by Jason Liu</p>
-      <p class="footer-copy">&copy; 2026 Devils Dectet. All rights reserved.</p>
+      <div class="footer-logo">
+        <span class="footer-logo-text">Devils Dectet</span>
+        <div class="footer-ornament" aria-hidden="true">
+          <span class="ornament-line"></span>
+          <span class="ornament-diamond"></span>
+          <span class="ornament-line ornament-line--rev"></span>
+        </div>
+      </div>
+      <div class="footer-meta">
+        <p class="footer-credit">Designed by Jason Liu</p>
+        <p class="footer-copy">&copy; 2026 Devils Dectet. All rights reserved.</p>
+      </div>
     </div>
   </footer>
 
   <!-- Bio Modal (injected by JS) -->
 
+  <!-- ─── Scripts ───────────────────────────────────────────── -->
+  <!-- GSAP + ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <!-- VanillaTilt – lightweight 3D tilt for cards -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
   <script src="script.js"></script>
 </body>
 
