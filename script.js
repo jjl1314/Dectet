@@ -2,7 +2,7 @@
 
 /* ═══════════════════════════════════════════════════════════════
    DEVILS DECTET — script.js
-   Modular JS · GSAP + ScrollTrigger · Canvas Waves · VanillaTilt
+   Members + bio modal · Gallery lightbox · Navigation · GSAP reveals
 ═══════════════════════════════════════════════════════════════ */
 
 /* ── Data ────────────────────────────────────────────────────── */
@@ -72,100 +72,26 @@ const musiciansData = [
 ];
 
 /* ═══════════════════════════════════════════════════════════════
-   MODULE: Hero Canvas (Animated Sound Waves)
+   Scroll lock. Hiding overflow removes the scrollbar, which pulls the
+   whole page sideways; reserving its width keeps everything still.
 ═══════════════════════════════════════════════════════════════ */
-const HeroCanvas = {
-  canvas: null,
-  ctx: null,
-  raf: null,
-  W: 0,
-  H: 0,
-  mouse: { x: 0.5, y: 0.5 }, // normalised 0–1
-
-  // Wave definitions: amp, freq, phase, speed, color, yBias
-  waves: [
-    { amp: 38,  freq: 0.0070, phase: 0,   speed: 0.013, alpha: 0.16, hue: 'crimson', yBias: 0   },
-    { amp: 22,  freq: 0.0110, phase: 1.5, speed: 0.020, alpha: 0.10, hue: 'gold',    yBias: 38  },
-    { amp: 52,  freq: 0.0042, phase: 3.1, speed: 0.007, alpha: 0.08, hue: 'crimson', yBias: -22 },
-    { amp: 14,  freq: 0.0170, phase: 5.0, speed: 0.028, alpha: 0.05, hue: 'cream',   yBias: 16  },
-  ],
-
-  _color(hue, alpha) {
-    const map = {
-      crimson: `rgba(185, 28, 60, ${alpha})`,
-      gold:    `rgba(201, 150, 63, ${alpha})`,
-      cream:   `rgba(242, 237, 228, ${alpha})`,
-    };
-    return map[hue] || `rgba(255,255,255,${alpha})`;
-  },
-
-  resize() {
-    this.W = this.canvas.width  = window.innerWidth;
-    this.H = this.canvas.height = window.innerHeight;
-  },
-
-  draw() {
-    const { ctx, W, H, waves, mouse } = this;
-    ctx.clearRect(0, 0, W, H);
-
-    // Centre Y sits in the lower-middle of the hero for elegance
-    const cy = H * 0.64;
-    const mx = mouse.x - 0.5; // -0.5 → +0.5 normalised mouse offset
-
-    waves.forEach(w => {
-      w.phase += w.speed;
-
-      // Gradient fade at edges for seamless blending
-      const grad = ctx.createLinearGradient(0, 0, W, 0);
-      const col  = this._color(w.hue, w.alpha);
-      grad.addColorStop(0,    'transparent');
-      grad.addColorStop(0.12, col);
-      grad.addColorStop(0.88, col);
-      grad.addColorStop(1,    'transparent');
-
-      ctx.beginPath();
-      ctx.strokeStyle = grad;
-      ctx.lineWidth   = 1.4;
-
-      for (let x = 0; x <= W; x += 2) {
-        // Subtle mouse influence: wave shifts slightly with horizontal mouse
-        const mouseNudge = Math.sin(x / W * Math.PI) * mx * 18;
-        const y = cy + w.yBias + Math.sin(x * w.freq + w.phase) * w.amp + mouseNudge;
-        x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-      }
-      ctx.stroke();
-    });
-  },
-
-  animate() {
-    this.draw();
-    this.raf = requestAnimationFrame(() => this.animate());
-  },
-
-  init() {
-    this.canvas = document.getElementById('heroCanvas');
-    if (!this.canvas) return;
-
-    // Skip heavy canvas if reduced motion preferred
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      this.canvas.style.display = 'none';
-      return;
+const ScrollLock = {
+  depth: 0,
+  on() {
+    if (this.depth++ > 0) return;
+    const bar = window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.overflow = 'hidden';
+    if (bar > 0) {
+      document.body.style.paddingRight = bar + 'px';
+      document.documentElement.style.setProperty('--sbw', bar + 'px');
     }
-
-    this.ctx = this.canvas.getContext('2d');
-    this.resize();
-
-    window.addEventListener('resize', () => this.resize(), { passive: true });
-    window.addEventListener('mousemove', e => {
-      this.mouse.x = e.clientX / window.innerWidth;
-      this.mouse.y = e.clientY / window.innerHeight;
-    }, { passive: true });
-
-    this.animate();
   },
-
-  destroy() {
-    if (this.raf) cancelAnimationFrame(this.raf);
+  off() {
+    this.depth = Math.max(0, this.depth - 1);
+    if (this.depth > 0) return;
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+    document.documentElement.style.removeProperty('--sbw');
   }
 };
 
@@ -177,31 +103,32 @@ const Members = {
     const grid = document.getElementById('membersGrid');
     if (!grid) return;
 
-    grid.innerHTML = musiciansData.map((m, i) => {
+    // Rendered in the order musiciansData lists them — the ensemble's own
+    // order. The index is the modal's key, so it must stay 1:1 with the data.
+    const cards = musiciansData.map((m, i) => {
       const isFounder = m.role === 'Founder';
       const imgMarkup = m.imageLink
         ? `<img src="${m.imageLink}" alt="Photo of ${m.name}" loading="lazy">`
         : '';
-      const badgeHTML = isFounder ? `<span class="role-badge">Founder</span>` : '';
+      const label = `View bio for ${m.name}, ${m.instrument}${isFounder ? ', founder' : ''}`;
+      const detail = isFounder
+        ? `${m.instrument}<span class="sep">&middot;</span><span class="member-role">Founder</span>`
+        : m.instrument;
 
       return `
         <div class="member-card" role="listitem" tabindex="0"
              data-member-index="${i}"
-             aria-label="View bio for ${m.name}, ${m.instrument}">
-          <div class="member-photo">
-            ${imgMarkup}
-            ${badgeHTML}
-            <div class="member-hover-hint" aria-hidden="true">
-              <span class="member-hint-text">View Bio</span>
-            </div>
-          </div>
+             aria-label="${label}">
+          <div class="member-photo">${imgMarkup}</div>
           <div class="member-info">
             <h3>${m.name}</h3>
-            <p>${m.instrument}</p>
+            <p>${detail}</p>
           </div>
         </div>
       `.trim();
     }).join('');
+
+    grid.innerHTML = `<div class="roster-grid" role="list">${cards}</div>`;
   },
 
   setupModal() {
@@ -260,13 +187,13 @@ const Members = {
       }
 
       modal.classList.add('active');
-      document.body.style.overflow = 'hidden';
+      ScrollLock.on();
       closeBtn.focus();
     };
 
     const close = () => {
       modal.classList.remove('active');
-      document.body.style.overflow = '';
+      ScrollLock.off();
       setTimeout(() => {
         imgEl.src = '';
         imgEl.alt = '';
@@ -293,21 +220,18 @@ const Members = {
       if (e.key === 'Escape' && modal.classList.contains('active')) close();
     });
 
+    // Focus stays in the dialog until it closes
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Tab' || !modal.classList.contains('active')) return;
+      const f = modal.querySelectorAll('button, a[href], [tabindex]:not([tabindex="-1"])');
+      if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    });
+
     closeBtn.addEventListener('click', close);
     overlay.addEventListener('click', close);
-  },
-
-  initTilt() {
-    // VanillaTilt 3D tilt on member cards — graceful degradation if lib absent
-    if (typeof VanillaTilt === 'undefined') return;
-    VanillaTilt.init(document.querySelectorAll('.member-card'), {
-      max: 7,
-      speed: 500,
-      glare: true,
-      'max-glare': 0.06,
-      scale: 1.02,
-      perspective: 800,
-    });
   }
 };
 
@@ -411,7 +335,15 @@ const Animations = {
   init() {
     gsap.registerPlugin(ScrollTrigger);
 
+    // Everything below fades content in from opacity 0. If the reader has
+    // asked for reduced motion, put it on the page instead of animating it.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      this._settle();
+      return;
+    }
+
     this._heroTimeline();
+    this._statement();
     this._sectionHeaders();
     this._memberCards();
     this._videoCards();
@@ -419,178 +351,110 @@ const Animations = {
     this._contactCards();
     this._featuredSection();
     this._heroParallax();
-    this._scrollHint();
   },
 
-  /* ── Hero entrance (runs after preloader) ─────────────────── */
-  _heroTimeline() {
-    const tl = gsap.timeline({ delay: 0.2 });
+  /* ── Reduced motion: final state, no tweens, no triggers ──── */
+  _settle() {
+    gsap.set('.hero-cta, .hero-place', { opacity: 1, y: 0 });
+    gsap.set('.word', { opacity: 1, yPercent: 0 });
+    gsap.set('.hero-bg', { scale: 1 });
+  },
 
-    tl.fromTo('.hero-eyebrow',
-      { y: 22, opacity: 0 },
-      { y: 0,  opacity: 1, duration: 0.85, ease: 'power3.out' }
+  /* ── Hero entrance ────────────────────────────────────────── */
+  _heroTimeline() {
+    const tl = gsap.timeline({ delay: 0.1 });
+
+    // The photograph settles out of a push-in over the whole entrance —
+    // slow enough that you register it as the room, not as an effect.
+    tl.fromTo('.hero-bg',
+      { scale: 1.07 },
+      { scale: 1, duration: 2.2, ease: 'expo.out' },
+      0
     )
+    // Opacity stays at 1: the mask does the revealing, not a fade.
     .fromTo('.word',
-      { y: '110%', opacity: 0 },
-      { y: '0%',   opacity: 1, stagger: 0.14, duration: 1.1, ease: 'power4.out' },
-      '-=0.45'
+      { yPercent: 112, opacity: 1 },
+      { yPercent: 0,   opacity: 1, stagger: 0.13, duration: 1.35, ease: 'expo.out' },
+      0.1
     )
-    .fromTo('.hero-ornament',
-      { opacity: 0, scaleX: 0.6 },
-      { opacity: 1, scaleX: 1,   duration: 0.7, ease: 'power2.out' },
-      '-=0.3'
-    )
-    .fromTo('.hero-sub',
-      { y: 24, opacity: 0 },
-      { y: 0,  opacity: 1, duration: 0.9, ease: 'power3.out' },
-      '-=0.4'
-    )
-    .fromTo('.hero-cta',
-      { y: 20, opacity: 0 },
-      { y: 0,  opacity: 1, duration: 0.7, ease: 'power3.out' },
-      '-=0.5'
+    .fromTo('.hero-cta, .hero-place',
+      { y: 12, opacity: 0 },
+      { y: 0,  opacity: 1, stagger: 0.08, duration: 0.9, ease: 'expo.out' },
+      0.95
     );
 
     return tl;
   },
 
-  /* ── Scroll hint pulse ────────────────────────────────────── */
-  _scrollHint() {
-    gsap.fromTo('.scroll-hint',
-      { opacity: 0, y: 10 },
-      { opacity: 1, y: 0, duration: 0.8, delay: 2.2, ease: 'power2.out' }
-    );
+  /* Reveals below are deliberately short. Content lifts about a line of
+     text and settles — enough to feel alive, not enough to be a show. */
+  REVEAL: { y: 26, duration: 1.15, ease: 'expo.out' },
 
-    // Fade out as user scrolls
-    ScrollTrigger.create({
-      trigger: '.hero-section',
-      start: 'top top',
-      end: '30% top',
-      onUpdate: self => {
-        gsap.set('.scroll-hint', { opacity: 1 - self.progress * 2 });
+  _reveal(targets, opts = {}) {
+    const { y, duration, ease } = this.REVEAL;
+    gsap.fromTo(targets,
+      { y, opacity: 0 },
+      {
+        y: 0, opacity: 1,
+        duration, ease,
+        stagger: opts.stagger || 0,
+        scrollTrigger: { trigger: opts.trigger, start: opts.start || 'top 86%' }
       }
-    });
+    );
   },
 
-  /* ── Section headers stagger in ──────────────────────────── */
+  /* ── The statement — arrives on its own, well after it enters view ── */
+  _statement() {
+    if (!document.querySelector('.statement-text')) return;
+    gsap.fromTo('.statement-text',
+      { y: 34, opacity: 0 },
+      {
+        y: 0, opacity: 1,
+        duration: 1.5,
+        ease: 'expo.out',
+        scrollTrigger: { trigger: '.statement', start: 'top 72%' }
+      }
+    );
+  },
+
+  /* ── Section heads ───────────────────────────────────────── */
   _sectionHeaders() {
     document.querySelectorAll('.section-header').forEach(header => {
-      const children = header.querySelectorAll('.section-eyebrow, .section-title, .section-subtitle');
-      gsap.fromTo(children,
-        { y: 40, opacity: 0 },
-        {
-          y: 0, opacity: 1,
-          stagger: 0.14,
-          duration: 1.0,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: header,
-            start: 'top 82%',
-          }
-        }
-      );
+      const children = header.querySelectorAll('.section-title, .section-subtitle');
+      if (!children.length) return;
+      this._reveal(children, { trigger: header, stagger: 0.1 });
     });
   },
 
-  /* ── Member cards staggered reveal ───────────────────────── */
+  /* ── Personnel ───────────────────────────────────────────── */
   _memberCards() {
-    gsap.fromTo('.member-card',
-      { y: 60, opacity: 0, scale: 0.96 },
-      {
-        y: 0, opacity: 1, scale: 1,
-        stagger: { each: 0.07, from: 'start' },
-        duration: 0.85,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: '#membersGrid',
-          start: 'top 85%',
-        }
-      }
-    );
+    this._reveal('.member-card', { trigger: '#membersGrid', stagger: 0.06 });
   },
 
-  /* ── Video cards ─────────────────────────────────────────── */
+  /* ── Performances ────────────────────────────────────────── */
   _videoCards() {
-    gsap.fromTo('.video-card',
-      { y: 50, opacity: 0 },
-      {
-        y: 0, opacity: 1,
-        stagger: 0.12,
-        duration: 0.9,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: '.videos-grid',
-          start: 'top 82%',
-        }
-      }
-    );
-
-    gsap.fromTo('.yt-cta-wrap',
-      { y: 24, opacity: 0 },
-      {
-        y: 0, opacity: 1,
-        duration: 0.8,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: '.yt-cta-wrap',
-          start: 'top 90%',
-        }
-      }
-    );
+    document.querySelectorAll('.video-card').forEach(card => {
+      this._reveal(card, { trigger: card });
+    });
+    if (document.querySelector('.yt-cta-wrap')) {
+      this._reveal('.yt-cta-wrap', { trigger: '.yt-cta-wrap', start: 'top 92%' });
+    }
   },
 
-  /* ── Gallery items ───────────────────────────────────────── */
+  /* ── Photographs — plates settle row by row ──────────────── */
   _galleryItems() {
-    gsap.fromTo('.gallery-item',
-      { y: 40, opacity: 0, scale: 0.97 },
-      {
-        y: 0, opacity: 1, scale: 1,
-        stagger: { each: 0.06, from: 'random' },
-        duration: 0.85,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: '.gallery-grid',
-          start: 'top 82%',
-        }
-      }
-    );
+    this._reveal('.gallery-item', { trigger: '.gallery-grid', stagger: 0.07 });
   },
 
-  /* ── Contact cards ───────────────────────────────────────── */
+  /* ── Contact ─────────────────────────────────────────────── */
   _contactCards() {
-    gsap.fromTo('.contact-intro',
-      { y: 30, opacity: 0 },
-      {
-        y: 0, opacity: 1,
-        duration: 0.9,
-        ease: 'power3.out',
-        scrollTrigger: { trigger: '.contact-intro', start: 'top 85%' }
-      }
-    );
-
-    gsap.fromTo('.contact-card',
-      { y: 40, opacity: 0 },
-      {
-        y: 0, opacity: 1,
-        stagger: 0.14,
-        duration: 0.85,
-        ease: 'power3.out',
-        scrollTrigger: { trigger: '.contact-cards', start: 'top 85%' }
-      }
-    );
+    this._reveal('.contact-intro', { trigger: '.contact-wrap' });
+    this._reveal('.contact-value', { trigger: '.contact-wrap' });
   },
 
-  /* ── Featured section ─────────────────────────────────────── */
+  /* ── Press ───────────────────────────────────────────────── */
   _featuredSection() {
-    gsap.fromTo('.featured-wrap',
-      { y: 50, opacity: 0 },
-      {
-        y: 0, opacity: 1,
-        duration: 1.0,
-        ease: 'power3.out',
-        scrollTrigger: { trigger: '.featured-wrap', start: 'top 82%' }
-      }
-    );
+    this._reveal('.featured-wrap', { trigger: '.featured-wrap' });
   },
 
   /* ── Hero background parallax ─────────────────────────────── */
@@ -598,7 +462,7 @@ const Animations = {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     gsap.to('.hero-bg', {
-      yPercent: 28,
+      yPercent: 9,
       ease: 'none',
       scrollTrigger: {
         trigger: '.hero-section',
@@ -606,32 +470,6 @@ const Animations = {
         end: 'bottom top',
         scrub: true,
       }
-    });
-  }
-};
-
-/* ═══════════════════════════════════════════════════════════════
-   MODULE: Magnetic Buttons
-═══════════════════════════════════════════════════════════════ */
-const MagneticButtons = {
-  init() {
-    document.querySelectorAll('.magnetic-btn').forEach(btn => {
-      btn.addEventListener('mousemove', e => {
-        const rect   = btn.getBoundingClientRect();
-        const cx     = rect.left + rect.width  / 2;
-        const cy     = rect.top  + rect.height / 2;
-        const dx     = e.clientX - cx;
-        const dy     = e.clientY - cy;
-        gsap.to(btn, {
-          x: dx * 0.28,
-          y: dy * 0.28,
-          duration: 0.4,
-          ease: 'power3.out'
-        });
-      });
-      btn.addEventListener('mouseleave', () => {
-        gsap.to(btn, { x: 0, y: 0, duration: 0.6, ease: 'elastic.out(1, 0.4)' });
-      });
     });
   }
 };
@@ -652,51 +490,115 @@ const YouTubeThumbs = {
 };
 
 /* ═══════════════════════════════════════════════════════════════
-   MODULE: Gallery Lightbox
+   MODULE: Gallery Lightbox — opens on a plate, then moves between them
 ═══════════════════════════════════════════════════════════════ */
+const CHEVRON = '<svg viewBox="0 0 10 18" aria-hidden="true" focusable="false"><path d="M9 1 1.5 9 9 17" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>';
+
 const Gallery = {
+  items: [],
+  index: 0,
+  box: null,
+
   init() {
-    document.addEventListener('click', e => {
-      const item = e.target.closest('.gallery-item');
-      if (!item || item.classList.contains('gallery-item--soon')) return;
+    this.items = Array.from(document.querySelectorAll('.gallery-item:not(.gallery-item--soon)'));
+    if (!this.items.length) return;
 
-      const photo = item.querySelector('.gallery-photo');
-      const bgImg = window.getComputedStyle(photo).backgroundImage;
-      const match = bgImg.match(/url\(["']?([^"')]+)["']?\)/);
-      if (!match) return;
-
-      const box = document.createElement('div');
-      box.className = 'lightbox';
-      box.setAttribute('role', 'dialog');
-      box.setAttribute('aria-modal', 'true');
-      box.setAttribute('aria-label', 'Gallery image');
-      box.innerHTML = `
-        <div class="lightbox-content">
-          <img src="${match[1]}" alt="Gallery photo enlarged">
-        </div>
-      `;
-      document.body.appendChild(box);
-      document.body.style.overflow = 'hidden';
-      // box.querySelector('.lightbox-close').focus();
-
-      const close = () => {
-        gsap.to(box, {
-          opacity: 0, duration: 0.22,
-          onComplete: () => {
-            document.body.removeChild(box);
-            document.body.style.overflow = '';
-          }
-        });
-      };
-
-      // box.querySelector('.lightbox-close').addEventListener('click', close);
-      box.addEventListener('click', e => { if (e.target === box) close(); });
-
-      const keyHandler = e => {
-        if (e.key === 'Escape') { close(); document.removeEventListener('keydown', keyHandler); }
-      };
-      document.addEventListener('keydown', keyHandler);
+    this.items.forEach((item, i) => {
+      item.addEventListener('click', () => this.open(i));
+      // the plates are focusable, so Enter and Space have to open them too
+      item.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); this.open(i); }
+      });
     });
+
+    document.addEventListener('keydown', e => {
+      if (!this.box) return;
+      if (e.key === 'Escape')          this.close();
+      else if (e.key === 'ArrowRight') this.step(1);
+      else if (e.key === 'ArrowLeft')  this.step(-1);
+    });
+  },
+
+  // Prefers the <img>; falls back to a background-image if one is ever used
+  _src(item) {
+    const img = item.querySelector('.gallery-photo img');
+    if (img) return img.currentSrc || img.src;
+    const photo = item.querySelector('.gallery-photo');
+    const match = photo && window.getComputedStyle(photo).backgroundImage.match(/url\(["']?([^"')]+)["']?\)/);
+    return match ? match[1] : '';
+  },
+
+  _venue(item) {
+    const el = item.querySelector('.gallery-venue');
+    return el ? el.textContent.trim() : '';
+  },
+
+  open(i) {
+    if (this.box) return;
+    this.index = i;
+
+    const box = document.createElement('div');
+    box.className = 'lightbox';
+    box.setAttribute('role', 'dialog');
+    box.setAttribute('aria-modal', 'true');
+    box.setAttribute('aria-label', 'Gallery photograph');
+    box.innerHTML = `
+      <button class="lightbox-close" aria-label="Close">&times;</button>
+      <button class="lightbox-nav lightbox-nav--prev" aria-label="Previous photograph">${CHEVRON}</button>
+      <div class="lightbox-content"><img src="" alt=""></div>
+      <button class="lightbox-nav lightbox-nav--next" aria-label="Next photograph">${CHEVRON}</button>
+      <p class="lightbox-caption">
+        <span class="lightbox-venue"></span><span class="lightbox-count"></span>
+      </p>
+    `;
+    document.body.appendChild(box);
+    this.box = box;
+    ScrollLock.on();
+    this.render(false);
+
+    // only the backdrop closes — the image and the arrows are live
+    box.addEventListener('click', e => { if (e.target === box) this.close(); });
+    box.querySelector('.lightbox-close').addEventListener('click', () => this.close());
+    box.querySelector('.lightbox-nav--prev').addEventListener('click', e => { e.stopPropagation(); this.step(-1); });
+    box.querySelector('.lightbox-nav--next').addEventListener('click', e => { e.stopPropagation(); this.step(1); });
+    box.querySelector('.lightbox-close').focus();
+  },
+
+  render(fade) {
+    const item  = this.items[this.index];
+    const img   = this.box.querySelector('.lightbox-content img');
+    const venue = this._venue(item);
+
+    img.src = this._src(item);
+    img.alt = venue ? `Devils Dectet at ${venue}` : 'Gallery photograph';
+    this.box.querySelector('.lightbox-venue').textContent = venue;
+    this.box.querySelector('.lightbox-count').textContent = `${this.index + 1} / ${this.items.length}`;
+
+    if (fade && typeof gsap !== 'undefined') {
+      gsap.fromTo(img, { opacity: 0 }, { opacity: 1, duration: 0.35, ease: 'power2.out' });
+    }
+  },
+
+  step(dir) {
+    if (!this.box) return;
+    this.index = (this.index + dir + this.items.length) % this.items.length;
+    this.render(true);
+  },
+
+  close() {
+    if (!this.box) return;
+    const box  = this.box;
+    const item = this.items[this.index];
+    this.box = null;
+
+    const remove = () => {
+      if (box.parentNode) box.parentNode.removeChild(box);
+      ScrollLock.off();
+      if (item && item.focus) item.focus();   // return focus to the plate you opened
+    };
+    // GSAP is a CDN script — the lightbox still has to close without it
+    if (typeof gsap === 'undefined') { remove(); return; }
+    gsap.to(box, { opacity: 0, duration: 0.28, ease: 'power2.out', onComplete: remove });
   }
 };
 
@@ -705,35 +607,22 @@ const Gallery = {
 ═══════════════════════════════════════════════════════════════ */
 document.addEventListener('DOMContentLoaded', () => {
 
-  // 2. Start canvas — independent of page load
-  HeroCanvas.init();
+  // Several elements start at opacity 0 for GSAP to reveal. If GSAP never
+  // arrives, this class hands them back rather than leaving a blank hero.
+  const hasGSAP = typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined';
+  if (!hasGSAP) document.documentElement.classList.add('no-motion');
 
-  // 3. Render members, set up modal + 3D tilt
   Members.render();
   Members.setupModal();
-
-  // 4. YouTube thumbnails (no network wait needed for bg-image)
   YouTubeThumbs.init();
-
-  // 5. Gallery lightbox
   Gallery.init();
-
-  // 7. Navigation
   Navigation.init();
 
-  // When everything is loaded, complete preloader then kick off GSAP
-    window.addEventListener('load', () => {
-    Animations.init();
-    Members.initTilt();
-    MagneticButtons.init();
-  });
-
-  // Fallback: if 'load' already fired
-  if (document.readyState === 'complete') {
-    Animations.init();
-    Members.initTilt();
-    MagneticButtons.init();
+  // Reveals wait for load so ScrollTrigger measures a settled page
+  if (hasGSAP) {
+    window.addEventListener('load', () => Animations.init());
+    if (document.readyState === 'complete') Animations.init();
   }
 
-  console.log('%cDevils Dectet ♪', 'color:#B91C3C;font-size:16px;font-weight:bold;font-family:Georgia,serif;');
+  console.log('%cDevils Dectet ♪', 'color:#9E1B32;font-size:16px;font-weight:bold;font-family:Georgia,serif;');
 });

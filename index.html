@@ -13,48 +13,41 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Devils Dectet</title>
+  <meta name="theme-color" content="#EDEBE6">
   <link rel="icon" type="image/x-icon" href="images/favicon.jpg">
   <link rel="apple-touch-icon" href="images/favicon.jpg">
   <meta property="og:title" content="Devils Dectet - Student Chamber Ensemble">
   <meta property="og:description"
-    content="A passionate chamber ensemble dedicated to bringing classical and contemporary music to our community through collaboration, creativity, and unforgettable performances.">
-  <meta property="og:image" content="https://yourwebsite.com/images/favicon.jpg">
-  <meta property="og:url" content="https://yourwebsite.com">
+    content="A not-for-profit, student-led string ensemble from Hinsdale, Illinois. Ten players, free concerts for schools, senior communities, and hospitals.">
+  <meta property="og:image" content="https://devilsdectet.com/images/holiday.jpg">
+  <meta property="og:url" content="https://devilsdectet.com">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Devils Dectet">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Devils Dectet - Student Chamber Ensemble">
   <meta name="twitter:description"
-    content="A passionate chamber ensemble dedicated to bringing classical and contemporary music to our community.">
-  <meta name="twitter:image" content="https://yourwebsite.com/images/favicon.jpg">
+    content="A not-for-profit, student-led string ensemble from Hinsdale, Illinois. Ten players, free concerts for schools, senior communities, and hospitals.">
+  <meta name="twitter:image" content="https://devilsdectet.com/images/holiday.jpg">
   <meta name="description"
-    content="Devils Dectet is a student-led chamber ensemble committed to sharing the beauty and power of ensemble music with schools and local audiences.">
+    content="Devils Dectet is a not-for-profit, student-led string ensemble from Hinsdale, Illinois. Ten players who give free concerts for schools, senior living communities, and hospitals.">
 
-  <!-- Fonts -->
+  <!-- Fonts — Instrument Serif for headings, Instrument Sans for everything else -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Outfit:wght@300;400;500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..600;1,400&family=Instrument+Serif:ital@0;1&display=swap"
     rel="stylesheet">
 
-  <!-- Icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-  <!-- Styles -->
   <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-
-  <!-- ─── Grain Overlay ─────────────────────────────────────── -->
-  <div class="grain-overlay" aria-hidden="true"></div>
 
   <!-- ─── Navigation ────────────────────────────────────────── -->
   <header id="site-header">
     <div class="container nav-content">
       <a href="#home" class="logo" aria-label="Devils Dectet home">
         <span class="logo-primary">Devils Dectet</span>
-        <span class="logo-sub">Chamber Ensemble</span>
       </a>
       <nav aria-label="Main navigation">
         <ul>
@@ -76,186 +69,184 @@
 
   <!-- ─── Hero ──────────────────────────────────────────────── -->
   <section id="home" class="hero-section" aria-label="Welcome">
-    <div class="hero-bg" role="img" aria-label="Devils Dectet ensemble performance"></div>
-    <!-- Animated sound-wave canvas -->
-    <canvas id="heroCanvas" aria-hidden="true"></canvas>
+    <div class="hero-bg" role="img" aria-label="Devils Dectet performing on stage"></div>
     <div class="hero-content container">
-      <p class="hero-eyebrow">Hinsdale, Illinois</p>
       <h1 class="hero-title">
-        <span class="word">Devils</span><span class="word italic-word">Dectet</span>
+        <span class="word-mask"><span class="word">Devils</span></span>
+        <span class="word-mask"><span class="word italic-word">Dectet</span></span>
       </h1>
-      <div class="hero-ornament" aria-hidden="true">
-        <span class="ornament-line"></span>
-        <span class="ornament-diamond"></span>
-        <span class="ornament-line ornament-line--rev"></span>
+      <div class="hero-foot">
+        <a href="#performances" class="link hero-cta">
+          Watch a performance <span class="btn-arrow">&rarr;</span>
+        </a>
+        <p class="hero-place">Hinsdale, Illinois</p>
       </div>
-      <p class="hero-sub">
-        Devils Dectet is a not-for-profit student-led ensemble committed to sharing the beauty and power of
-        ensemble music with schools and local audiences. We believe music is a universal language that connects
+    </div>
+  </section>
+
+  <!-- ─── Statement ─────────────────────────────────────────── -->
+  <section class="statement on-dark" aria-label="About the ensemble">
+    <div class="container">
+      <p class="statement-text">
+        Ten students. <em>One dectet.</em> We&rsquo;re a not-for-profit, student-led ensemble sharing the beauty and
+        power of music with schools and local audiences. We believe music is a universal language that connects
         people and enriches communities.
       </p>
-      <div class="hero-cta">
-        <a href="#performances" class="btn btn--outline magnetic-btn">
-          View Performances <span class="btn-arrow">→</span>
-        </a>
-      </div>
     </div>
   </section>
 
   <!-- ─── Members ───────────────────────────────────────────── -->
-  <section id="members" class="section members-section" aria-labelledby="members-title">
+  <section id="members" class="section" aria-labelledby="members-title">
     <div class="container">
       <div class="section-header">
-        <h2 class="section-title" id="members-title">Meet Our Members</h2>
-        <p class="section-subtitle">Ten dedicated musicians bringing the strings to life</p>
+        <h2 class="section-title" id="members-title">Members</h2>
+        <p class="section-subtitle">Select a member to read their bio.</p>
       </div>
-      <div class="members-grid" id="membersGrid" role="list" aria-label="Ensemble members"></div>
+      <div id="membersGrid"></div>
     </div>
   </section>
 
   <!-- ─── Performances ──────────────────────────────────────── -->
-  <section id="performances" class="section performances-section" aria-labelledby="perf-title">
+  <section id="performances" class="section ground-alt" aria-labelledby="perf-title">
     <div class="container">
       <div class="section-header">
-        <h2 class="section-title" id="perf-title">Past Performances</h2>
-        <p class="section-subtitle">Highlights from our recent shows</p>
+        <h2 class="section-title" id="perf-title">Performances</h2>
       </div>
       <div class="videos-grid">
 
         <article class="video-card">
           <a href="https://www.youtube.com/watch?v=FfyFiKXF_Vs" target="_blank" rel="noopener noreferrer"
-            class="video-link" aria-label="Watch Edelweiss - March 2025 at Hinsdale Central">
+            class="video-link" aria-label="Watch Edelweiss, March 2025 at Hinsdale Central">
             <div class="video-thumb" data-youtube-id="FfyFiKXF_Vs">
               <div class="video-thumb-overlay"></div>
               <div class="play-btn" aria-hidden="true">
-                <div class="play-icon">&#9654;</div>
+                <div class="play-icon">
+                  <svg viewBox="0 0 12 14" aria-hidden="true" focusable="false"><path d="M12 7 0 14V0Z" /></svg>
+                </div>
               </div>
             </div>
             <div class="video-meta">
-              <p class="video-date">March 2025 &bull; Hinsdale Central</p>
               <h3 class="video-title">Edelweiss</h3>
+              <p class="video-venue">Hinsdale Central High School<span class="sep">&middot;</span>March 2025</p>
             </div>
           </a>
         </article>
 
         <article class="video-card">
           <a href="https://www.youtube.com/watch?v=NpXnhpgza7k" target="_blank" rel="noopener noreferrer"
-            class="video-link" aria-label="Watch Happy Holidays - December 2025 at Anthem Memory Care">
+            class="video-link" aria-label="Watch Happy Holidays, December 2025 at Anthem Memory Care">
             <div class="video-thumb" data-youtube-id="NpXnhpgza7k">
               <div class="video-thumb-overlay"></div>
               <div class="play-btn" aria-hidden="true">
-                <div class="play-icon">&#9654;</div>
+                <div class="play-icon">
+                  <svg viewBox="0 0 12 14" aria-hidden="true" focusable="false"><path d="M12 7 0 14V0Z" /></svg>
+                </div>
               </div>
             </div>
             <div class="video-meta">
-              <p class="video-date">December 2025 &bull; Anthem Memory Care</p>
               <h3 class="video-title">Happy Holidays</h3>
+              <p class="video-venue">Anthem Memory Care<span class="sep">&middot;</span>December 2025</p>
             </div>
           </a>
         </article>
 
         <article class="video-card">
           <a href="https://www.youtube.com/watch?v=ZaEwqSNf244" target="_blank" rel="noopener noreferrer"
-            class="video-link" aria-label="Watch Postcards From Russia - February 2026 at The Sheridan">
+            class="video-link" aria-label="Watch Postcards From Russia, February 2026 at The Sheridan">
             <div class="video-thumb" data-youtube-id="ZaEwqSNf244">
               <div class="video-thumb-overlay"></div>
               <div class="play-btn" aria-hidden="true">
-                <div class="play-icon">&#9654;</div>
+                <div class="play-icon">
+                  <svg viewBox="0 0 12 14" aria-hidden="true" focusable="false"><path d="M12 7 0 14V0Z" /></svg>
+                </div>
               </div>
             </div>
             <div class="video-meta">
-              <p class="video-date">February 2026 &bull; The Sheridan</p>
               <h3 class="video-title">Postcards From Russia</h3>
+              <p class="video-venue">The Sheridan<span class="sep">&middot;</span>February 2026</p>
             </div>
           </a>
         </article>
 
       </div>
-    </div>
-    <div class="yt-cta-wrap">
-      <a href="https://www.youtube.com/@DevilsDectet" target="_blank" rel="noopener noreferrer" class="yt-btn"
-        aria-label="Visit our YouTube channel">
-        <i class="fab fa-youtube" aria-hidden="true"></i> Visit Our Channel
-      </a>
+      <div class="yt-cta-wrap">
+        <a href="https://www.youtube.com/@DevilsDectet" target="_blank" rel="noopener noreferrer" class="yt-btn"
+          aria-label="Check out our YouTube channel">
+          <svg viewBox="0 0 24 17" aria-hidden="true" focusable="false">
+            <path
+              d="M23.5 2.66A3.01 3.01 0 0 0 21.38.54C19.51 0 12 0 12 0S4.49 0 2.62.54A3.01 3.01 0 0 0 .5 2.66C0 4.53 0 8.43 0 8.43s0 3.9.5 5.77a3.01 3.01 0 0 0 2.12 2.12C4.49 16.86 12 16.86 12 16.86s7.51 0 9.38-.54a3.01 3.01 0 0 0 2.12-2.12c.5-1.87.5-5.77.5-5.77s0-3.9-.5-5.77ZM9.55 12.02V4.84l6.27 3.59-6.27 3.59Z" />
+          </svg>
+          <span class="yt-label">Check out our channel!</span>
+        </a>
+      </div>
     </div>
   </section>
 
   <!-- ─── Gallery ───────────────────────────────────────────── -->
-  <section id="gallery" class="section gallery-section" aria-labelledby="gallery-title">
+  <!-- Each photo carries its true ratio in --ar; the row derives widths
+       from those ratios so rows come out flush with nothing cropped.
+       To add a photo, put its width/height in --ar and drop it in a row. -->
+  <section id="gallery" class="section" aria-labelledby="gallery-title">
     <div class="container">
       <div class="section-header">
         <h2 class="section-title" id="gallery-title">Gallery</h2>
       </div>
-      <div class="gallery-grid" role="list">
+      <div class="gallery-grid">
 
-        <div class="gallery-item" role="listitem">
-          <div class="gallery-photo" style="background-image:url('images/gallery/IMG_5983.jpg')" role="img"
-            aria-label="The Sheridan performance">
-            <div class="gallery-overlay">
-              <p class="gallery-venue">The Sheridan</p>
+        <div class="gallery-row" role="list">
+          <div class="gallery-item" role="listitem" tabindex="0" style="--ar: 1320/954">
+            <div class="gallery-photo">
+              <img src="images/gallery/IMG_5983.jpg" alt="Devils Dectet at The Sheridan" loading="lazy" decoding="async">
             </div>
+            <p class="gallery-venue">The Sheridan</p>
+          </div>
+          <div class="gallery-item" role="listitem" tabindex="0" style="--ar: 979/580">
+            <div class="gallery-photo">
+              <img src="images/gallery/IMG_5984.jpg" alt="Devils Dectet at The Birches" loading="lazy" decoding="async">
+            </div>
+            <p class="gallery-venue">The Birches</p>
+          </div>
+          <div class="gallery-item" role="listitem" tabindex="0" style="--ar: 1185/857">
+            <div class="gallery-photo">
+              <img src="images/gallery/IMG_5985.jpg" alt="Devils Dectet at Eden Vista" loading="lazy" decoding="async">
+            </div>
+            <p class="gallery-venue">Eden Vista</p>
           </div>
         </div>
-        <div class="gallery-item" role="listitem">
-          <div class="gallery-photo" style="background-image:url('images/gallery/IMG_5984.jpg')" role="img"
-            aria-label="The Birches performance">
-            <div class="gallery-overlay">
-              <p class="gallery-venue">The Birches</p>
+
+        <div class="gallery-row" role="list">
+          <div class="gallery-item" role="listitem" tabindex="0" style="--ar: 1228/945">
+            <div class="gallery-photo">
+              <img src="images/gallery/IMG_5986.jpg" alt="Devils Dectet at Anthem Memory Care" loading="lazy" decoding="async">
             </div>
+            <p class="gallery-venue">Anthem Memory Care</p>
+          </div>
+          <div class="gallery-item" role="listitem" tabindex="0" style="--ar: 3515/3023">
+            <div class="gallery-photo">
+              <img src="images/gallery/5th.jpg" alt="Devils Dectet at The Sheridan" loading="lazy" decoding="async">
+            </div>
+            <p class="gallery-venue">The Sheridan</p>
           </div>
         </div>
-        <div class="gallery-item" role="listitem">
-          <div class="gallery-photo" style="background-image:url('images/gallery/IMG_5985.jpg')" role="img"
-            aria-label="Eden Vista performance">
-            <div class="gallery-overlay">
-              <p class="gallery-venue">Eden Vista</p>
+
+        <div class="gallery-row" role="list">
+          <div class="gallery-item" role="listitem" tabindex="0" style="--ar: 5041/3213">
+            <div class="gallery-photo">
+              <img src="images/gallery/6th.jpg" alt="Devils Dectet at UChicago Medicine AdventHealth" loading="lazy" decoding="async">
             </div>
+            <p class="gallery-venue">UChicago Medicine AdventHealth</p>
           </div>
-        </div>
-        <div class="gallery-item" role="listitem">
-          <div class="gallery-photo" style="background-image:url('images/gallery/IMG_5986.jpg')" role="img"
-            aria-label="Anthem Memory Care performance">
-            <div class="gallery-overlay">
-              <p class="gallery-venue">Anthem Memory Care</p>
+          <div class="gallery-item" role="listitem" tabindex="0" style="--ar: 4775/3213">
+            <div class="gallery-photo">
+              <img src="images/gallery/7th.jpg" alt="Devils Dectet at Eden Vista" loading="lazy" decoding="async">
             </div>
+            <p class="gallery-venue">Eden Vista</p>
           </div>
-        </div>
-        <div class="gallery-item gallery-item--soon" role="listitem" aria-label="More photos coming soon">
-          <div class="gallery-photo gallery-photo--placeholder">
-            <i class="fas fa-camera" aria-hidden="true"></i>
-            <span>More photos coming soon</span>
-          </div>
-        </div>
-        <div class="gallery-item" role="listitem">
-          <div class="gallery-photo" style="background-image:url('images/gallery/5th.jpg')" role="img"
-            aria-label="The Sheridan performance">
-            <div class="gallery-overlay">
-              <p class="gallery-venue">The Sheridan</p>
+          <div class="gallery-item" role="listitem" tabindex="0" style="--ar: 5002/3408">
+            <div class="gallery-photo">
+              <img src="images/gallery/8th.jpg" alt="Devils Dectet at Beacon Hill" loading="lazy" decoding="async">
             </div>
-          </div>
-        </div>
-        <div class="gallery-item" role="listitem">
-          <div class="gallery-photo" style="background-image:url('images/gallery/6th.jpg')" role="img"
-            aria-label="UChicago Medicine AdventHealth performance">
-            <div class="gallery-overlay">
-              <p class="gallery-venue">UChicago Medicine AdventHealth</p>
-            </div>
-          </div>
-        </div>
-        <div class="gallery-item" role="listitem">
-          <div class="gallery-photo" style="background-image:url('images/gallery/7th.jpg')" role="img"
-            aria-label="Eden Vista performance">
-            <div class="gallery-overlay">
-              <p class="gallery-venue">Eden Vista</p>
-            </div>
-          </div>
-        </div>
-        <div class="gallery-item" role="listitem">
-          <div class="gallery-photo" style="background-image:url('images/gallery/8th.jpg')" role="img"
-            aria-label="Beacon Hill performance">
-            <div class="gallery-overlay">
-              <p class="gallery-venue">Beacon Hill</p>
-            </div>
+            <p class="gallery-venue">Beacon Hill</p>
           </div>
         </div>
 
@@ -263,79 +254,64 @@
     </div>
   </section>
 
-  <!-- ─── Featured In ───────────────────────────────────────── -->
-  <section id="featured" class="section featured-section" aria-labelledby="featured-title">
+  <!-- ─── Featured ──────────────────────────────────────────── -->
+  <section id="featured" class="section ground-alt" aria-labelledby="featured-title">
     <div class="container">
       <div class="section-header">
-        <h2 class="section-title" id="featured-title">Featured In</h2>
+        <h2 class="section-title" id="featured-title">Featured</h2>
       </div>
       <div class="featured-wrap">
         <a href="https://www.thehinsdalean.com/story/2026/02/05/news/central-teens-unite-for-sound-vision/10478.html"
           target="_blank" rel="noopener noreferrer" class="featured-img-link"
-          aria-label="Read our feature in The Hinsdalean">
+          aria-label="Read the article in The Hinsdalean">
           <img src="images/feature.jpg" alt="Devils Dectet featured in The Hinsdalean newspaper" class="featured-img">
-          <div class="featured-img-overlay">
-            <span class="featured-read-cta">Read the Article &rarr;</span>
-          </div>
+          <span class="featured-img-overlay">
+            <span class="featured-read-cta">Read the article</span>
+          </span>
         </a>
-        <p class="featured-desc">We&rsquo;re honored to be featured in The Hinsdalean!</p>
+        <div class="featured-body">
+          <p class="featured-masthead">The Hinsdalean</p>
+          <a class="featured-headline-link"
+            href="https://www.thehinsdalean.com/story/2026/02/05/news/central-teens-unite-for-sound-vision/10478.html"
+            target="_blank" rel="noopener noreferrer">
+            <h3 class="featured-headline">Central teens unite for sound vision</h3>
+          </a>
+        </div>
       </div>
     </div>
   </section>
 
   <!-- ─── Contact ───────────────────────────────────────────── -->
-  <section id="contact" class="section contact-section" aria-labelledby="contact-title">
+  <section id="contact" class="section" aria-labelledby="contact-title">
     <div class="container">
       <div class="section-header">
-        <h2 class="section-title" id="contact-title">Get In Touch</h2>
+        <h2 class="section-title" id="contact-title">Contact</h2>
       </div>
       <div class="contact-wrap">
         <p class="contact-intro">
-          Interested in booking Devils Dectet for your event for free or collaborating with us?<br>
+          Interested in booking Devils Dectet for your event for free or collaborating with us?
           We&rsquo;d love to hear from you!
         </p>
-        <div class="contact-cards">
-          <div class="contact-card">
-            <i class="fas fa-envelope contact-icon" aria-hidden="true"></i>
-            <p class="contact-label">Email Us</p>
-            <a href="mailto:devilsdectet@gmail.com" class="contact-value">devilsdectet@gmail.com</a>
-          </div>
-          <div class="contact-card">
-            <i class="fas fa-map-marker-alt contact-icon" aria-hidden="true"></i>
-            <p class="contact-label">Location</p>
-            <p class="contact-value-small">Available for performances throughout the region</p>
-          </div>
-        </div>
+        <a href="mailto:devilsdectet@gmail.com" class="contact-value">devilsdectet@gmail.com</a>
       </div>
     </div>
   </section>
 
   <!-- ─── Footer ────────────────────────────────────────────── -->
-  <footer>
+  <footer class="on-dark">
     <div class="container footer-inner">
-      <div class="footer-logo">
-        <span class="footer-logo-text">Devils Dectet</span>
-        <div class="footer-ornament" aria-hidden="true">
-          <span class="ornament-line"></span>
-          <span class="ornament-diamond"></span>
-          <span class="ornament-line ornament-line--rev"></span>
-        </div>
-      </div>
+      <span class="footer-logo-text">Devils Dectet</span>
       <div class="footer-meta">
         <p class="footer-credit">Designed by Jason Liu</p>
-        <p class="footer-copy">&copy; 2026 Devils Dectet. All rights reserved.</p>
+        <p class="footer-copy">&copy; 2026 Devils Dectet</p>
       </div>
     </div>
   </footer>
 
-  <!-- Bio Modal (injected by JS) -->
+  <!-- Bio modal is injected by script.js -->
 
-  <!-- ─── Scripts ───────────────────────────────────────────── -->
-  <!-- GSAP + ScrollTrigger -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <!-- VanillaTilt – lightweight 3D tilt for cards -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
   <script src="script.js"></script>
 </body>
 
