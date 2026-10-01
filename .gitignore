@@ -1,0 +1,16 @@
+# Local working files — keep off the public site / repo.
+# The venue lists contain named individuals' work email addresses.
+devils_dectet_venue_list.md
+devils_dectet_outreach_email.md
+devils_dectet_venue_list_new.md
+
+# Local visual checks from earlier experiments.
+.preview/
+
+# Generated video from the archived overture experiment. Not used by the site.
+vid.mp4
+
+# Agent skills installed for design work (hyperframes, apple-design).
+# Tooling, not part of the site: keep them off the published pages.
+.claude/skills/
+skills-lock.json

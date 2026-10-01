@@ -38,7 +38,36 @@
     href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..600;1,400&family=Instrument+Serif:ital@0;1&display=swap"
     rel="stylesheet">
 
+  <!-- The film opens on this photograph -->
+  <link rel="preload" as="image" href="images/holiday.jpg">
+
   <link rel="stylesheet" href="styles.css">
+
+  <!-- The reel needs JavaScript and a reader who has not asked for less
+       motion. Decided before first paint so neither layout flashes: the
+       film's first frame (the photograph and the name) is on screen from
+       the start. If the film never boots, the page is handed back as the
+       static site. -->
+  <script>
+    (function (root) {
+      var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (calm) return;
+      root.classList.add('reel');
+      // the name waits for its typeface, so it is never seen in another
+      var shown = false;
+      var show = function () { if (!shown) { shown = true; root.classList.add('reel-type'); } };
+      if (document.fonts && document.fonts.load && window.Promise) {
+        Promise.all([
+          document.fonts.load('400 1em "Instrument Serif"'),
+          document.fonts.load('italic 400 1em "Instrument Serif"')
+        ]).then(show, show);
+      } else show();
+      setTimeout(show, 1500);
+      setTimeout(function () {
+        if (!window.__reelBooted) root.classList.remove('reel');
+      }, 4000);
+    })(document.documentElement);
+  </script>
 </head>
 
 <body>
@@ -67,6 +96,11 @@
     </div>
   </header>
 
+  <!-- With the reel running, <main> is the single frame of the film: every
+       section below becomes a scene inside it, placed by reel.js for the
+       current timecode. Without it, this is the page exactly as before. -->
+  <main id="main" class="reel-stage">
+
   <!-- ─── Hero ──────────────────────────────────────────────── -->
   <section id="home" class="hero-section" aria-label="Welcome">
     <div class="hero-bg" role="img" aria-label="Devils Dectet performing on stage"></div>
@@ -88,7 +122,7 @@
   <section class="statement on-dark" aria-label="About the ensemble">
     <div class="container">
       <p class="statement-text">
-        Ten students. <em>One dectet.</em> We&rsquo;re a not-for-profit, student-led ensemble sharing the beauty and
+        Ten students. <em>One Dectet.</em> We&rsquo;re a not-for-profit, student-led ensemble sharing the beauty and
         power of music with schools and local audiences. We believe music is a universal language that connects
         people and enriches communities.
       </p>
@@ -118,6 +152,11 @@
           <a href="https://www.youtube.com/watch?v=FfyFiKXF_Vs" target="_blank" rel="noopener noreferrer"
             class="video-link" aria-label="Watch Edelweiss, March 2025 at Hinsdale Central">
             <div class="video-thumb" data-youtube-id="FfyFiKXF_Vs">
+              <span class="video-thumb-frame">
+                <img class="video-thumb-img" src="images/reel/yt-FfyFiKXF_Vs-lg.webp"
+                  srcset="images/reel/yt-FfyFiKXF_Vs-sm.webp 640w, images/reel/yt-FfyFiKXF_Vs-lg.webp 1280w"
+                  sizes="(max-width: 780px) 100vw, 58vw" alt="" loading="lazy" decoding="async">
+              </span>
               <div class="video-thumb-overlay"></div>
               <div class="play-btn" aria-hidden="true">
                 <div class="play-icon">
@@ -136,6 +175,11 @@
           <a href="https://www.youtube.com/watch?v=NpXnhpgza7k" target="_blank" rel="noopener noreferrer"
             class="video-link" aria-label="Watch Happy Holidays, December 2025 at Anthem Memory Care">
             <div class="video-thumb" data-youtube-id="NpXnhpgza7k">
+              <span class="video-thumb-frame">
+                <img class="video-thumb-img" src="images/reel/yt-NpXnhpgza7k-lg.webp"
+                  srcset="images/reel/yt-NpXnhpgza7k-sm.webp 640w, images/reel/yt-NpXnhpgza7k-lg.webp 1280w"
+                  sizes="(max-width: 780px) 100vw, 58vw" alt="" loading="lazy" decoding="async">
+              </span>
               <div class="video-thumb-overlay"></div>
               <div class="play-btn" aria-hidden="true">
                 <div class="play-icon">
@@ -154,6 +198,11 @@
           <a href="https://www.youtube.com/watch?v=ZaEwqSNf244" target="_blank" rel="noopener noreferrer"
             class="video-link" aria-label="Watch Postcards From Russia, February 2026 at The Sheridan">
             <div class="video-thumb" data-youtube-id="ZaEwqSNf244">
+              <span class="video-thumb-frame">
+                <img class="video-thumb-img" src="images/reel/yt-ZaEwqSNf244-lg.webp"
+                  srcset="images/reel/yt-ZaEwqSNf244-sm.webp 640w, images/reel/yt-ZaEwqSNf244-lg.webp 1280w"
+                  sizes="(max-width: 780px) 100vw, 58vw" alt="" loading="lazy" decoding="async">
+              </span>
               <div class="video-thumb-overlay"></div>
               <div class="play-btn" aria-hidden="true">
                 <div class="play-icon">
@@ -196,19 +245,28 @@
         <div class="gallery-row" role="list">
           <div class="gallery-item" role="listitem" tabindex="0" style="--ar: 1320/954">
             <div class="gallery-photo">
-              <img src="images/gallery/IMG_5983.jpg" alt="Devils Dectet at The Sheridan" loading="lazy" decoding="async">
+              <img src="images/reel/IMG_5983-lg.webp"
+                srcset="images/reel/IMG_5983-sm.webp 800w, images/reel/IMG_5983-lg.webp 1320w"
+                sizes="(max-width: 780px) 100vw, 40vw" data-full="images/gallery/IMG_5983.jpg"
+                alt="Devils Dectet at The Sheridan" loading="lazy" decoding="async">
             </div>
             <p class="gallery-venue">The Sheridan</p>
           </div>
           <div class="gallery-item" role="listitem" tabindex="0" style="--ar: 979/580">
             <div class="gallery-photo">
-              <img src="images/gallery/IMG_5984.jpg" alt="Devils Dectet at The Birches" loading="lazy" decoding="async">
+              <img src="images/reel/IMG_5984-lg.webp"
+                srcset="images/reel/IMG_5984-sm.webp 800w, images/reel/IMG_5984-lg.webp 979w"
+                sizes="(max-width: 780px) 100vw, 40vw" data-full="images/gallery/IMG_5984.jpg"
+                alt="Devils Dectet at The Birches" loading="lazy" decoding="async">
             </div>
             <p class="gallery-venue">The Birches</p>
           </div>
           <div class="gallery-item" role="listitem" tabindex="0" style="--ar: 1185/857">
             <div class="gallery-photo">
-              <img src="images/gallery/IMG_5985.jpg" alt="Devils Dectet at Eden Vista" loading="lazy" decoding="async">
+              <img src="images/reel/IMG_5985-lg.webp"
+                srcset="images/reel/IMG_5985-sm.webp 800w, images/reel/IMG_5985-lg.webp 1185w"
+                sizes="(max-width: 780px) 100vw, 40vw" data-full="images/gallery/IMG_5985.jpg"
+                alt="Devils Dectet at Eden Vista" loading="lazy" decoding="async">
             </div>
             <p class="gallery-venue">Eden Vista</p>
           </div>
@@ -217,13 +275,19 @@
         <div class="gallery-row" role="list">
           <div class="gallery-item" role="listitem" tabindex="0" style="--ar: 1228/945">
             <div class="gallery-photo">
-              <img src="images/gallery/IMG_5986.jpg" alt="Devils Dectet at Anthem Memory Care" loading="lazy" decoding="async">
+              <img src="images/reel/IMG_5986-lg.webp"
+                srcset="images/reel/IMG_5986-sm.webp 800w, images/reel/IMG_5986-lg.webp 1228w"
+                sizes="(max-width: 780px) 100vw, 40vw" data-full="images/gallery/IMG_5986.jpg"
+                alt="Devils Dectet at Anthem Memory Care" loading="lazy" decoding="async">
             </div>
             <p class="gallery-venue">Anthem Memory Care</p>
           </div>
           <div class="gallery-item" role="listitem" tabindex="0" style="--ar: 3515/3023">
             <div class="gallery-photo">
-              <img src="images/gallery/5th.jpg" alt="Devils Dectet at The Sheridan" loading="lazy" decoding="async">
+              <img src="images/reel/5th-lg.webp"
+                srcset="images/reel/5th-sm.webp 800w, images/reel/5th-lg.webp 1600w"
+                sizes="(max-width: 780px) 100vw, 40vw" data-full="images/gallery/5th.jpg"
+                alt="Devils Dectet at The Sheridan" loading="lazy" decoding="async">
             </div>
             <p class="gallery-venue">The Sheridan</p>
           </div>
@@ -232,19 +296,28 @@
         <div class="gallery-row" role="list">
           <div class="gallery-item" role="listitem" tabindex="0" style="--ar: 5041/3213">
             <div class="gallery-photo">
-              <img src="images/gallery/6th.jpg" alt="Devils Dectet at UChicago Medicine AdventHealth" loading="lazy" decoding="async">
+              <img src="images/reel/6th-lg.webp"
+                srcset="images/reel/6th-sm.webp 800w, images/reel/6th-lg.webp 1600w"
+                sizes="(max-width: 780px) 100vw, 40vw" data-full="images/gallery/6th.jpg"
+                alt="Devils Dectet at UChicago Medicine AdventHealth" loading="lazy" decoding="async">
             </div>
             <p class="gallery-venue">UChicago Medicine AdventHealth</p>
           </div>
           <div class="gallery-item" role="listitem" tabindex="0" style="--ar: 4775/3213">
             <div class="gallery-photo">
-              <img src="images/gallery/7th.jpg" alt="Devils Dectet at Eden Vista" loading="lazy" decoding="async">
+              <img src="images/reel/7th-lg.webp"
+                srcset="images/reel/7th-sm.webp 800w, images/reel/7th-lg.webp 1600w"
+                sizes="(max-width: 780px) 100vw, 40vw" data-full="images/gallery/7th.jpg"
+                alt="Devils Dectet at Eden Vista" loading="lazy" decoding="async">
             </div>
             <p class="gallery-venue">Eden Vista</p>
           </div>
           <div class="gallery-item" role="listitem" tabindex="0" style="--ar: 5002/3408">
             <div class="gallery-photo">
-              <img src="images/gallery/8th.jpg" alt="Devils Dectet at Beacon Hill" loading="lazy" decoding="async">
+              <img src="images/reel/8th-lg.webp"
+                srcset="images/reel/8th-sm.webp 800w, images/reel/8th-lg.webp 1600w"
+                sizes="(max-width: 780px) 100vw, 40vw" data-full="images/gallery/8th.jpg"
+                alt="Devils Dectet at Beacon Hill" loading="lazy" decoding="async">
             </div>
             <p class="gallery-venue">Beacon Hill</p>
           </div>
@@ -297,6 +370,8 @@
     </div>
   </section>
 
+  </main>
+
   <!-- ─── Footer ────────────────────────────────────────────── -->
   <footer class="on-dark">
     <div class="container footer-inner">
@@ -310,8 +385,7 @@
 
   <!-- Bio modal is injected by script.js -->
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="reel.js"></script>
   <script src="script.js"></script>
 </body>
 
