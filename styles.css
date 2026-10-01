@@ -19,8 +19,14 @@
   --accent:  #9A2B22;   /* instrument varnish — 6.8:1 on ivory, 6.0:1 on stone */
   --plate:   #1C1813;
 
-  --f-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
-  --f-sans:    'Instrument Sans', system-ui, -apple-system, sans-serif;
+  /* A Didone set narrow, with the poise of a concert programme, over a
+     newspaper gothic. The display face is variable: --d-wdth and --d-wght
+     are its width and weight, and the film moves them at a few moments. */
+  --f-display: 'Noto Serif Display', Didot, 'Bodoni 72', Georgia, serif;
+  --f-sans:    'Libre Franklin', system-ui, -apple-system, sans-serif;
+  --d-wdth: 70%;
+  --d-wght: 300;
+  --d-wght-text: 400;   /* small display type keeps its hairlines */
 
   --t-hero:  clamp(66px, 15vw, 228px);
   --t-stmt:  clamp(25px, 3.2vw, 50px);
@@ -98,11 +104,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Every heading is the same face, weight and tracking */
+/* Every heading is the same face, width and tracking */
 h1, h2, h3 {
   font-family: var(--f-display);
-  font-weight: 400;
-  letter-spacing: -0.024em;
+  font-weight: var(--d-wght);
+  font-stretch: var(--d-wdth);
+  letter-spacing: -0.012em;
   line-height: 1.04;
 }
 
@@ -185,9 +192,11 @@ h1[tabindex="-1"]:focus, h2[tabindex="-1"]:focus { outline: none; }
 .logo { text-decoration: none; flex-shrink: 0; }
 .logo-primary {
   font-family: var(--f-display);
+  font-weight: var(--d-wght-text);
+  font-stretch: var(--d-wdth);
   font-size: 23px;
   line-height: 1;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.005em;
   color: var(--ink);
 }
 
@@ -314,7 +323,7 @@ header.nav-open .menu-bar:nth-child(3) { transform: translateY(-7px) rotate(-45d
 .hero-title {
   font-size: var(--t-hero);
   line-height: 0.80;
-  letter-spacing: -0.038em;
+  letter-spacing: -0.025em;
   /* optical: the D's sidebearing, so the stem sits on the true margin */
   margin-left: -0.045em;
   margin-bottom: clamp(28px, 4vh, 56px);
@@ -352,9 +361,11 @@ header.nav-open .menu-bar:nth-child(3) { transform: translateY(-7px) rotate(-45d
   text-align: center;
   max-width: 19em;
   font-family: var(--f-display);
+  font-weight: var(--d-wght-text);
+  font-stretch: var(--d-wdth);
   font-size: var(--t-stmt);
   line-height: 1.2;
-  letter-spacing: -0.026em;
+  letter-spacing: -0.012em;
   text-wrap: pretty;
   hanging-punctuation: first;
 }
@@ -403,6 +414,7 @@ header.nav-open .menu-bar:nth-child(3) { transform: translateY(-7px) rotate(-45d
   margin-bottom: 3px;
   margin-left: -0.02em;
   transition: color var(--t-base) var(--ease-io);
+  font-weight: var(--d-wght-text);
 }
 .member-card:hover .member-info h3,
 .member-card:focus-visible .member-info h3 { color: var(--accent); }
@@ -897,9 +909,11 @@ header.nav-open .menu-bar:nth-child(3) { transform: translateY(-7px) rotate(-45d
 /* Masthead, rule, headline, dateline — the folio of a printed page */
 .featured-masthead {
   font-family: var(--f-display);
+  font-weight: var(--d-wght-text);
+  font-stretch: var(--d-wdth);
   font-size: clamp(24px, 2.4vw, 34px);
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.005em;
   margin-left: -0.02em;
   padding: var(--s3) 0;
   border-top: 1px solid var(--rule);
@@ -959,9 +973,11 @@ header.nav-open .menu-bar:nth-child(3) { transform: translateY(-7px) rotate(-45d
   justify-self: start;
   display: block;
   font-family: var(--f-display);
+  font-weight: var(--d-wght);
+  font-stretch: var(--d-wdth);
   font-size: min(7.6vw, 112px);
   line-height: 1;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.02em;
   margin-left: -0.03em;
   padding-bottom: 0.14em;
   white-space: nowrap;
@@ -987,9 +1003,11 @@ footer { padding: 0 0 var(--s7); }
 }
 .footer-logo-text {
   font-family: var(--f-display);
+  font-weight: var(--d-wght-text);
+  font-stretch: var(--d-wdth);
   font-size: 23px;
   line-height: 1;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.005em;
   color: var(--ink);
 }
 .footer-meta { display: flex; align-items: baseline; gap: var(--s5); flex-wrap: wrap; }
@@ -1154,7 +1172,7 @@ html.reel:not(.reel-on) footer { visibility: hidden; }
    that first frame, which is invisible but enough for the browser to
    decode and rasterise it. The title card itself is held exactly as it
    is until the film is ready, whatever the warm-up renders. */
-html.reel.reel-warming .reel-stage > :not(.hero-section) { opacity: 0.005 !important; }
+html.reel.reel-warming .reel-stage > :not(.hero-section):not(.tuning) { opacity: 0.005 !important; }
 html.reel.reel-warming footer { visibility: hidden; }
 html.reel:not(.reel-ready) .hero-foot > *,
 html.reel:not(.reel-ready) .hero-title .word { opacity: 1 !important; }
@@ -1168,8 +1186,47 @@ html.reel:not(.reel-ready) .hero-title .word-mask + .word-mask > .word {
   letter-spacing: inherit !important;
   will-change: auto !important;
 }
-html.reel:not(.reel-ready) .hero-bg { opacity: 1 !important; }
 html.reel:not(.reel-ready) .fly { visibility: hidden !important; }
+
+/* ── Tuning: the film's preloader ───────────────────────────── */
+/* While the film gets ready (its typefaces, its photographs, and one pass
+   over every scene so none of them stalls later), the frame is dark and
+   one string is tuned across it: plucked as each part arrives, it settles
+   as the last one does. Then the name rises out of it and the house lights
+   come up. It lasts exactly as long as the loading does, and a hand on the
+   scroll ends it at once. (reel.js plays it.) */
+.tuning { display: none; }
+/* (in the frame, over the photograph and under the name, which rises out
+   of it: the frame itself is dark until the house lights come up) */
+html.reel .tuning {
+  display: block;
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  /* the dark the string hangs in, over everything the warm-up is passing
+     through underneath; just short of opaque, because under a fully
+     opaque pane the browser stops rasterising what is beneath it */
+  background: rgba(28, 24, 19, 0.985);
+  pointer-events: none;
+}
+/* the string, still, until the script takes it up */
+html.reel .tuning::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  top: 50%;
+  height: 1px;
+  background: rgba(243, 241, 235, 0.6);
+}
+html.reel .tuning.is-live::before { display: none; }
+html.reel .tuning canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+html.reel.reel-tuned .tuning { display: none; }
+/* Until the downbeat the title card waits, all but invisible, so the
+   browser has it rasterised and ready to show; the bar comes in after
+   the name */
+html.reel:not(.reel-overture) .hero-bg,
+html.reel:not(.reel-overture) .hero-content { opacity: 0.005 !important; }
+html.reel:not(.reel-tuned) header { opacity: 0; pointer-events: none; }
 
 /* Scenes share the frame. Each is a transparent page over one ground,
    and the order they stack in is the order they cover one another. */
@@ -1298,7 +1355,8 @@ html.reel .fly {
   left: 0; top: 0;
   font-family: var(--f-display);
   font-style: italic;
-  font-weight: 400;
+  font-weight: var(--d-wght);
+  font-stretch: var(--d-wdth);
   line-height: 1;
   white-space: nowrap;
   color: #F3F1EB;
@@ -1340,6 +1398,7 @@ html.reel .statement .st-copy { clip-path: inset(-25% -25% -25% calc(50% - 1px))
    photograph (reel.js sizes both and moves the box against the curtain) */
 html.reel .st-wash { position: absolute; will-change: transform; }
 html.reel .st-curtain {
+  display: block;
   position: absolute;
   left: 0; top: 0;
   max-width: none;
@@ -1359,9 +1418,10 @@ html.reel .statement-text {
 }
 html.reel .st-lead {
   display: block;
+  font-weight: var(--d-wght);
   font-size: min(11.2vw, 17.5vh);
   line-height: 0.9;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.02em;
 }
 /* each line is a mask its words rise into */
 html.reel .st-l { display: block; clip-path: inset(-0.35em -0.6em -0.14em -0.6em); }
@@ -1437,7 +1497,27 @@ html.reel .m-half {
 }
 html.reel .m-half--bottom { bottom: 0; }
 
+/* the heading gathers with the players: reel.js draws its width in */
+html.reel #members .section-title { clip-path: none; white-space: nowrap; }
+html.reel #members .section-title .rise {
+  font-stretch: calc(var(--wdth, 70) * 1%);
+  letter-spacing: calc(var(--track, -0.012) * 1em);
+}
+
 /* ── The recordings ─────────────────────────────────────────── */
+/* the heading and the channel are projected: a soft-edged beam crosses
+   them from the left (reel.js moves it with --beam, 0 to 1) */
+html.reel #performances .section-title .rise,
+html.reel #performances .yt-cta-wrap {
+  -webkit-mask-image: linear-gradient(90deg, #000 40%, rgba(0, 0, 0, 0) 60%);
+  mask-image: linear-gradient(90deg, #000 40%, rgba(0, 0, 0, 0) 60%);
+  -webkit-mask-size: 250% 100%;
+  mask-size: 250% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: calc((1 - var(--beam, 1)) * 100%) 0;
+  mask-position: calc((1 - var(--beam, 1)) * 100%) 0;
+}
 /* All three in view at once, in the dark: side by side on a wide
    frame, one under another on a tall one */
 html.reel #performances {
@@ -1528,6 +1608,17 @@ html.reel .contact-value { background: none; padding-bottom: 0; }
 html.reel .contact-value .rise {
   padding-bottom: 0.14em;
   background: linear-gradient(var(--accent), var(--accent)) 0 100% / 100% 1.5px no-repeat;
+}
+/* the mask the last page's words are written in, which rises with the
+   ink (reel.js sizes it and moves the words back against it) */
+html.reel .c-ink {
+  position: absolute;
+  left: 0; right: 0;
+  top: 0;
+  padding: var(--reel-top) 0 0;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  will-change: transform;
 }
 /* the ink, rising over the newspaper behind a soft edge */
 html.reel .c-wash {

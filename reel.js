@@ -11,27 +11,36 @@
    scroll position always shows the same picture, however you arrived at
    it, and scrolling back runs the film backwards exactly.
 
-   The cut is written in beats: 128 BPM, thirty beats of 4/4. It ends on
-   the frame where the last page is complete, so the bottom of the page is
-   that frame: there is no scrolling past it.
+   The cut is written in beats: 128 BPM, a little over seven bars of 4/4.
+   It ends on the frame where the last page is complete, so the bottom of
+   the page is that frame: there is no scrolling past it.
 
+     Before     While it gets ready, one string is tuned across the dark
+                frame; on the downbeat the name rises out of it and the
+                house lights come up (Tuning, below).
      Bar 1      The stage, and the name across it. The photograph washes
                 into the curtain; "Devils" fades as it passes behind, and
                 "Dectet" travels on its own into "Ten students. One
                 Dectet."
      Bar 2      The statement, set on the curtain, which parts.
      Bar 3      Behind it the stage breaks into ten, and each piece
-                turns over into one of the players.
+                turns over into one of the players. The heading gathers
+                with them.
      Bar 4      The roster parts like a curtain on the screening room;
-                the three recordings open out of the dark.
+                the three recordings open out of the dark, and their
+                heading is projected.
      Bar 5      The camera goes on past them, and the photographs come
-                towards it out of the depth of the frame.
+                towards it out of the depth of the frame; the light that
+                comes up behind them finds their heading.
      Bar 6      They gather into one pile, and the newspaper photograph
                 lands on top of it. The page prints round it.
-     Bar 7–8    Ink washes up over the page, and the address is set on it.
+     Bar 7–8    Ink washes up over the page, and the last page is written
+                in it.
+
+   No two headings arrive the same way: each comes the way its scene does.
 
    Structure: easing · tracks · the film · stage · layout · measure ·
-   the cut · scroll map · playhead.
+   the cut · scroll map · playhead · tuning.
 ═══════════════════════════════════════════════════════════════ */
 window.__reelBooted = true;
 
@@ -39,7 +48,7 @@ window.__reelBooted = true;
 
   const BPM   = 128;
   const BEAT  = 60 / BPM;          // seconds per beat
-  const BEATS = 30;                // to the frame where the last page is complete
+  const BEATS = 29.4;              // to the frame where the last page is complete
   const LAG   = 0.06;              // s — how quickly the picture catches the playhead
   const CUT_COVER  = 180;          // ms — the colour comes up
   const CUT_REVEAL = 380;          // ms — and lifts off the new frame
@@ -267,6 +276,7 @@ window.__reelBooted = true;
   const Stage = {
     saved: [],
     added: [],
+    unwrap: [],
 
     make(tag, cls, parent, attrs) {
       const el = document.createElement(tag);
@@ -375,7 +385,9 @@ window.__reelBooted = true;
       }
       // the curtain, behind a soft edge that washes down over the photograph
       const wash = this.make('div', 'st-wash', null, hidden());
-      this.make('img', 'st-curtain', wash, { alt: '', decoding: 'async' });
+      // (drawn straight into the frame: an image would first have to be
+      // encoded, which costs more than making the curtain does)
+      this.make('canvas', 'st-curtain', wash);
       box.insertBefore(wash, box.firstChild);
       const copy = box.cloneNode(true);
       copy.classList.add('st-copy');
@@ -427,14 +439,25 @@ window.__reelBooted = true;
       sec.insertBefore(this.light, sec.firstChild);
     },
 
-    // The ink that washes up over the newspaper
+    // The ink that washes up over the newspaper, and the mask the last
+    // page's words are written in as it rises. (The mask holds the page's
+    // own content, so it is not hidden from anyone; teardown takes the
+    // content back out of it.)
     buildContact() {
       const sec = $('#contact');
       this.cWash = this.make('div', 'c-wash', null, hidden());
       sec.insertBefore(this.cWash, sec.firstChild);
+      const box = $('.container', sec);
+      const ink = this.cInk = document.createElement('div');
+      ink.className = 'c-ink';
+      sec.insertBefore(ink, box);
+      ink.appendChild(box);
+      this.unwrap.push(() => { sec.insertBefore(box, ink); ink.remove(); });
     },
 
     teardown() {
+      for (const u of this.unwrap) u();
+      this.unwrap = [];
       for (const el of this.added) if (el.parentNode) el.parentNode.removeChild(el);
       this.added = [];
       for (const [el, html] of this.saved) el.innerHTML = html;
@@ -538,32 +561,35 @@ window.__reelBooted = true;
     const c = document.createElement('canvas');
     c.width = W; c.height = H;
     const x = c.getContext('2d');
-    const row = x.createImageData(W, 1);
-    const at = (p, u) => {
-      const f = u * (sw - 1), i = Math.floor(f), k = f - i, j = Math.min(sw - 1, i + 1);
-      return [0, 1, 2].map(ch => p[i * 3 + ch] * (1 - k) + p[j * 3 + ch] * k);
-    };
-    // the folds' shading, deepened a little: the photograph is lit flat
-    for (let y = 0; y < H; y++) {
-      const v = y / (H - 1);
-      for (let X = 0; X < W; X++) {
-        const u = X / (W - 1);
-        const a = at(top, u), b = at(bot, u);
-        let [R, G, B] = gradeRGB(lerp(a[0], b[0], v), lerp(a[1], b[1], v), lerp(a[2], b[2], v));
-        const dx = (X - W / 2) / (W * 0.8), dy = (y + H * 0.2) / (H * 1.3);
-        const lit = clamp(1.28 - 0.8 * Math.sqrt(dx * dx + dy * dy), 0.3, 1.25);
-        const i = X * 4;
-        row.data[i] = clamp(R * lit * 1.12) * 255;
-        row.data[i + 1] = clamp(G * lit) * 255;
-        row.data[i + 2] = clamp(B * lit * 1.02) * 255;
-        row.data[i + 3] = 255;
+    // Each column's colour at the top and foot of the folds, graded once
+    // (the grade is all but linear over the velvet's colours, so grading
+    // the two ends and blending between them is the same picture, at a
+    // fraction of the work: the curtain is then made in a few milliseconds)
+    const cols = new Float32Array(W * 6);
+    for (let X = 0; X < W; X++) {
+      const f = X / (W - 1) * (sw - 1), i = Math.floor(f), k = f - i, j = Math.min(sw - 1, i + 1);
+      for (let e = 0; e < 2; e++) {
+        const p = e ? bot : top;
+        const g = gradeRGB(p[i * 3] * (1 - k) + p[j * 3] * k, p[i * 3 + 1] * (1 - k) + p[j * 3 + 1] * k, p[i * 3 + 2] * (1 - k) + p[j * 3 + 2] * k);
+        cols[X * 6 + e * 3] = g[0]; cols[X * 6 + e * 3 + 1] = g[1]; cols[X * 6 + e * 3 + 2] = g[2];
       }
-      x.putImageData(row, 0, y);
     }
-    return new Promise(res => {
-      if (!c.toBlob) { res(c.toDataURL('image/jpeg', 0.9)); return; }
-      c.toBlob(b => res(b ? URL.createObjectURL(b) : c.toDataURL('image/jpeg', 0.9)), 'image/jpeg', 0.9);
-    });
+    // the folds' shading, deepened a little: the photograph is lit flat
+    const pic = x.createImageData(W, H), d = pic.data;
+    for (let y = 0; y < H; y++) {
+      const v = y / (H - 1), dy = (y + H * 0.2) / (H * 1.3);
+      for (let X = 0, o = y * W * 4; X < W; X++, o += 4) {
+        const dx = (X - W / 2) / (W * 0.8);
+        const lit = clamp(1.28 - 0.8 * Math.sqrt(dx * dx + dy * dy), 0.3, 1.25);
+        const q = X * 6;
+        d[o] = clamp((cols[q] + (cols[q + 3] - cols[q]) * v) * lit * 1.12) * 255;
+        d[o + 1] = clamp((cols[q + 1] + (cols[q + 4] - cols[q + 1]) * v) * lit) * 255;
+        d[o + 2] = clamp((cols[q + 2] + (cols[q + 5] - cols[q + 2]) * v) * lit * 1.02) * 255;
+        d[o + 3] = 255;
+      }
+    }
+    x.putImageData(pic, 0, 0);
+    return c;
   }
 
   /* ═══════════════════════════════════════════════════════════════
@@ -777,11 +803,17 @@ window.__reelBooted = true;
     const box = $('#contact .container');
     const foot = Stage.footer.getBoundingClientRect().top;
     F.contactDrop = centre(F, box, [0, foot], foot - Math.max(20, F.H * 0.035), 0);
-    // and the ink's soft edge
+    // and the ink's soft edge, which the words are written in too
     const edge = Math.round(F.H * 0.55);
     F.inkEdge = edge;
-    Paint.set(Stage.cWash, 'height', `${F.H + edge}px`);
+    Paint.set(Stage.cWash, 'height', `${r2(F.H + edge * 1.12)}px`);
     Paint.set(Stage.cWash, 'backgroundImage', `linear-gradient(to bottom, rgba(28, 24, 19, 0) 0px, rgb(28, 24, 19) ${edge}px)`);
+    // (the words come only where the ink is all but solid behind them, so
+    // they never read over the page it is covering)
+    const mask = `linear-gradient(to bottom, rgba(0, 0, 0, 0) ${r2(edge * 0.78)}px, #000 ${r2(edge * 1.04)}px)`;
+    Paint.set(Stage.cInk, 'height', `${r2(F.H + edge * 1.12)}px`);
+    Paint.set(Stage.cInk, 'maskImage', mask);
+    Paint.set(Stage.cInk, 'webkitMaskImage', mask);
   }
 
   /* ═══════════════════════════════════════════════════════════════
@@ -839,7 +871,7 @@ window.__reelBooted = true;
     { id: 'performances', live: [15.9, K.pass],               at: 16.1,  from: K.split + 0.6 },
     { id: 'gallery',      live: [20.6, K.gather],             at: 20.8,  from: K.pass + 1.1 },
     { id: 'featured',     live: [25.5, K.wash],               at: 25.7,  from: K.press },
-    { id: 'contact',      live: [K.wash + 2.2, BEATS + 0.01], at: BEATS, from: K.wash + 0.8 },
+    { id: 'contact',      live: [K.wash + 1.2, BEATS + 0.01], at: BEATS, from: K.wash + 0.8 },
   ];
   SCENES.forEach(s => { s.at0 = s.at; });
 
@@ -870,6 +902,12 @@ window.__reelBooted = true;
       const keys = [[t0, drop], [t0 + d, 0, 'outCubic']];
       if (out) keys.push([out, 0], [out + 0.5, drop, 'inCubic']);
       f.key(T.el, 'y', keys);
+    };
+    // ...or only sinks away, having arrived some other way
+    const sink = (T, out) => {
+      if (!T) return;
+      const drop = r2(T.h.getBoundingClientRect().height * 1.5);
+      f.key(T.el, 'y', [[out, 0], [out + 0.5, drop, 'inCubic']]);
     };
 
     // The hold: the camera travels down a scene taller than the frame, as
@@ -990,11 +1028,13 @@ window.__reelBooted = true;
     f.key(Stage.dim, 'o', [[K.lift, 0], [2.4, 0.32, 'inOutSine'], [3.6, 0.32], [3.61, 0]]);
     f.key($('.hero-bg'), 'o', [[3.59, 1], [3.6, 0]]);
     // the curtain comes down over the photograph behind a soft edge
-    f.rig(0, 3.6, t => {
-      const T = washT(t);
+    // ...and while the statement holds, the velvet drifts slowly behind the
+    // lettering, which stands still: the words are in front of it
+    f.rig(0, K.part, t => {
+      const T = washT(t), drift = -H * 0.028 * E.inOutSine(span(t, WASH[0] + WASH[1], K.part - WASH[0] - WASH[1]));
       for (const h of halves) {
         Paint.set(h.wash, 'transform', `translate3d(0, ${r2(T)}px, 0)`);
-        Paint.set(h.curtain, 'transform', `translate3d(0, ${r2(-T)}px, 0)`);
+        Paint.set(h.curtain, 'transform', `translate3d(0, ${r2(drift - T)}px, 0)`);
       }
     });
     // Then it parts down the middle: each half slides out and swings a
@@ -1113,7 +1153,17 @@ window.__reelBooted = true;
       f.key(c.meta, 'o', [[t0 + 0.08, 0], [t0 + 0.58, 1, 'outQuad']]);
       f.key(c.meta, 'y', [[t0 + 0.08, 10], [t0 + 0.88, 0, 'outCubic']]);
     });
-    rise(Stage.titles.members, K.roster - 0.6, 0.9);
+    // The heading gathers as the players do: set wide and loose, it draws
+    // in to the face's own narrow width as the ten land in their places
+    // (its width is the typeface's, not a stretch, so the letters stay true;
+    // the heading keeps the room it will end in, so nothing beside it moves)
+    const mT = Stage.titles.members;
+    if (mT) {
+      Paint.set(mT.h, 'width', `${r2(mT.h.getBoundingClientRect().width)}px`);
+      f.key(mT.el, 'o', [[K.roster - 1.05, 0], [K.roster - 0.5, 1, 'outQuad']]);
+      f.key(mT.el, '--wdth', [[K.roster - 1.05, 100], [K.roster + 0.05, 70, 'inOutCubic']]);
+      f.key(mT.el, '--track', [[K.roster - 1.05, 0.07], [K.roster + 0.05, -0.012, 'inOutCubic']]);
+    }
     f.key($('.section-subtitle', mSec), 'o', [[K.roster - 0.1, 0], [K.roster + 0.5, 1, 'outQuad']]);
     const mTravel = F.membersTravel || 0, mDrift = mTravel > 0 ? 0 : H * 0.02;
     ride('members', mBox, mTravel, mDrift);
@@ -1148,10 +1198,14 @@ window.__reelBooted = true;
     const cta = $('.yt-cta-wrap', pSec);
     const pTravel = F.perfTravel || 0, pDrift = pTravel > 0 ? 0 : H * 0.025;
     f.key(pSec, 'o', [[K.split - 0.01, 0], [K.split, 1], [K.pass + 1.45, 1], [K.pass + 1.46, 0]]);
-    rise(Stage.titles.performances, K.split + 0.45, 0.9);
+    // The heading is projected: a beam crosses the row from the left as
+    // the screens come up, and finds the channel at the end of it
+    const beam = (el, t0, d) => { if (el) f.key(el, '--beam', [[t0, 0], [t0 + d, 1, 'inOutSine']]); };
+    beam(Stage.titles.performances && Stage.titles.performances.el, K.split + 0.4, 0.85);
     // The heading and the channel step back first, before the frames grow
     // into the room they stand in
-    f.key(cta, 'o', [[K.split + 0.9, 0], [K.split + 1.5, 1, 'outQuad'], [K.pass - 0.15, 1], [K.pass + 0.25, 0, 'inQuad']]);
+    beam(cta, K.split + 0.85, 0.6);
+    f.key(cta, 'o', [[K.pass - 0.15, 1], [K.pass + 0.25, 0, 'inQuad']]);
     f.key(pHead, 'y', [[K.pass - 0.15, 0], [K.pass + 0.4, -H * 0.05, 'inCubic']]);
     f.key(pHead, 'o', [[K.pass - 0.15, 1], [K.pass + 0.3, 0, 'inQuad']]);
     ride('performances', pBox, pTravel, pDrift);
@@ -1212,7 +1266,10 @@ window.__reelBooted = true;
     f.key(gSec, 'o', [[K.pass + 0.69, 0], [K.pass + 0.7, 1], [K.press + 0.95, 1], [K.press + 0.96, 0]]);
     // The heading sinks away just before the photographs gather, and is
     // gone well before the newspaper's comes down on them
-    rise(Stage.titles.gallery, K.pass + 1.5, 0.9, K.gather - 0.15);
+    // The heading has no entrance of its own: it is ink, in the dark room,
+    // and the light coming up from behind the photographs finds it. It
+    // sinks away behind its baseline just before they gather.
+    sink(Stage.titles.gallery, K.gather - 0.15);
     // The lights come up from behind the photographs as they arrive, a
     // soft disc of paper opening out from where they come from
     const LD = 512, reach = 2 * Math.hypot(Math.max(V.x, W - V.x), Math.max(V.y, H - V.y)) / 0.56 / LD;
@@ -1275,7 +1332,15 @@ window.__reelBooted = true;
     f.key(fImg, 's', [[K.press, 1.12], [K.press + 0.8, 1, 'outExpo']]);
     f.key(fImg, 'r', [[K.press, 2.5], [K.press + 0.8, 0, 'outExpo']]);
     f.key(fImg, 'y', [[K.press, -H * 0.04], [K.press + 0.8, 0, 'outExpo']]);
-    rise(Stage.titles.featured, K.press + 0.55, 0.9);
+    // The page is printed. The heading is pressed onto it as the
+    // photograph lands, the masthead runs across in one pass, and the
+    // headline comes off the roller, from the top line down.
+    const fT = Stage.titles.featured;
+    if (fT) {
+      Paint.set(fT.el, 'transformOrigin', '0 60%');
+      f.key(fT.el, 'o', [[K.press + 0.1, 0], [K.press + 0.32, 1, 'outQuad']]);
+      f.key(fT.el, 's', [[K.press + 0.1, 1.16], [K.press + 0.6, 1, 'outCubic']]);
+    }
     // the masthead and its rules are printed across the page in one pass
     // (before the pass begins it is not there at all: a clip left a sliver
     // of its rules standing at the left edge)
@@ -1285,24 +1350,34 @@ window.__reelBooted = true;
       Paint.set(fMast, 'visibility', u > 0 ? '' : 'hidden');
       Paint.set(fMast, 'clipPath', u >= 1 ? 'none' : `inset(-12% ${r2((1 - u) * 100)}% -12% -2%)`);
     });
-    rise(Stage.headline, K.press + 0.95, 0.9);
+    const hl = Stage.headline;
+    if (hl) {
+      const t0r = K.press + 0.95, dr = 0.85;
+      f.rig(t0r, t0r + dr, t => {
+        const u = E.inOutSine(span(t, t0r, dr));
+        Paint.set(hl.el, 'visibility', u > 0 ? '' : 'hidden');
+        Paint.set(hl.el, 'clipPath', u >= 1 ? 'none' : `inset(-12% -6% ${r2((1 - u) * 112)}% -6%)`);
+      });
+    }
     // the page drifts as it holds, and lifts away under the ink
     const [f0, f1] = HOLD.featured;
     f.key(fBox, 'y', [[f0, 0], [f1, -H * 0.02], [K.wash + 1.4, -H * 0.08, 'inCubic']]);
 
     /* ── 9 · Ink washes up; the address ─────────────────────── */
     const cSec = $('#contact');
-    const cIntro = $('.contact-intro', cSec);
     const footer = Stage.footer;
     f.key(cSec, 'o', [[K.wash - 0.01, 0], [K.wash, 1]]);
-    f.key(Stage.cWash, 'y', [[K.wash, H], [K.wash + 1.5, -F.inkEdge, 'inOutSine']]);
-    rise(Stage.titles.contact, K.wash + 1.0, 0.9);
-    f.key(cIntro, 'o', [[K.wash + 1.2, 0], [K.wash + 1.8, 1, 'outQuad']]);
-    f.key(cIntro, 'y', [[K.wash + 1.2, 14], [K.wash + 2.0, 0, 'outCubic']]);
-    rise(Stage.email, K.wash + 1.35, 0.95);
+    // The last page is written in the ink as it rises: its words are there
+    // wherever the ink has reached, the address first and the heading last
+    // (the page's own words, in a mask that moves with the ink; the words
+    // are moved back against it, so they stand still while it passes)
+    const ink = [[K.wash, H], [K.wash + 1.5, -F.inkEdge * 1.08, 'inOutSine']];
+    f.key(Stage.cWash, 'y', ink);
+    f.key(Stage.cInk, 'y', ink);
+    f.key($('.container', cSec), 'y', ink.map(([t, v, e]) => [t, -v, e]));
     // and the footer's rule comes up under it all, on the film's last beat
-    f.key(footer, 'o', [[K.wash + 1.7, 0], [K.wash + 2.3, 1, 'outQuad']]);
-    f.key(footer, 'y', [[K.wash + 1.7, 10], [BEATS, 0, 'outCubic']]);
+    f.key(footer, 'o', [[K.wash + 1.05, 0], [K.wash + 1.65, 1, 'outQuad']]);
+    f.key(footer, 'y', [[K.wash + 1.05, 10], [BEATS, 0, 'outCubic']]);
 
     f.seal();
     return { film: f, M };
@@ -1633,9 +1708,12 @@ window.__reelBooted = true;
     if (Reel.ready) tell(cutting ? 'reel:jump' : 'reel:moved');
   }
 
+  // How long each part of getting ready took (for the curious, and tests)
+  const Timings = {};
+
   function fontsReady() {
     if (!document.fonts || !document.fonts.load) return Promise.resolve();
-    const faces = ['400 100px "Instrument Serif"', 'italic 400 100px "Instrument Serif"', '400 16px "Instrument Sans"', '500 16px "Instrument Sans"'];
+    const faces = ['300 100px "Noto Serif Display"', 'italic 300 100px "Noto Serif Display"', '400 100px "Noto Serif Display"', '400 16px "Libre Franklin"', '500 16px "Libre Franklin"'];
     const all = Promise.all(faces.map(f => document.fonts.load(f).catch(() => null)));
     return Promise.race([all, new Promise(r => setTimeout(r, 2500))]);
   }
@@ -1650,9 +1728,11 @@ window.__reelBooted = true;
         done = true;
         if (img.naturalWidth) {
           Stage.photoSize = { w: img.naturalWidth, h: img.naturalHeight };
-          let url = null;
-          try { url = await curtainFrom(img); } catch (e) { /* no curtain: velvet */ }
-          Stage.curtainURL = url;
+          let curtain = null;
+          const t0 = performance.now();
+          try { curtain = await curtainFrom(img); } catch (e) { /* no curtain: velvet */ }
+          Timings.curtain = Math.round(performance.now() - t0);
+          Stage.curtain = curtain;
         }
         resolve();
       };
@@ -1674,9 +1754,11 @@ window.__reelBooted = true;
 
   function imagesReady(limit) {
     const pending = $$('.reel-stage img').filter(i => i.src && !i.complete);
+    Tuning.expect(pending.length);
     const all = Promise.all(pending.map(i => new Promise(r => {
-      i.addEventListener('load', r, { once: true });
-      i.addEventListener('error', r, { once: true });
+      const done = () => { Tuning.arrived(); r(); };
+      i.addEventListener('load', done, { once: true });
+      i.addEventListener('error', done, { once: true });
     })));
     return Promise.race([all, new Promise(r => setTimeout(r, limit))]);
   }
@@ -1696,15 +1778,178 @@ window.__reelBooted = true;
   // scene's first appearance costs a stall. (The title card is held as it
   // is meanwhile: see html.reel:not(.reel-ready) in styles.css.)
   const WARM = [0.8, 1.6, 2.4, 3.2, 4.4, 5.6, 7.9, 8.6, 9.3, 10.0, 10.8, 12.5, 14.4, 14.9, 15.6, 17.0, 18.5, 18.9,
-                19.4, 19.9, 21.4, 22.9, 23.4, 23.9, 24.6, 25.2, 26.5, 28.0, 28.6, 29.2, 29.6, 30.0];
+                19.4, 19.9, 21.4, 22.9, 23.4, 23.9, 24.6, 25.2, 26.5, 28.0, 28.5, 28.9, 29.4];
   async function warm() {
+    const t0 = performance.now();
     root.classList.add('reel-warming');
+    Tuning.expect(WARM.length);
     for (const t of WARM) {
       Play.film.render(t);
       await frames(3);
+      Tuning.arrived();
     }
     root.classList.remove('reel-warming');
+    Timings.warm = Math.round(performance.now() - t0);
   }
+
+  /* ═══════════════════════════════════════════════════════════════
+     TUNING — while the film gets ready, one string is tuned across the
+     dark frame. Each part that arrives (a typeface, a photograph, a scene
+     rendered once) plucks it, the more gently the less there is left to
+     come, and it rings down to stillness on the line the name stands on.
+     On the downbeat the name rises out of it and the house lights come
+     up. Nothing here is waited for: it lasts as long as the loading, and
+     a hand on the scroll ends it at once.
+  ═══════════════════════════════════════════════════════════════ */
+  const Tuning = {
+    el: null, cv: null, g: null, raf: 0, last: 0, clock: 0,
+    amp: 0, damp: 1.5, y: NaN, ty: NaN, W: 0, H: 0, dpr: 1,
+    done: 0, total: 1, settled: null,
+
+    start() {
+      const el = $('.tuning');
+      if (!el || this.cv) return;
+      this.el = el;
+      this.cv = document.createElement('canvas');
+      el.appendChild(this.cv);
+      this.g = this.cv.getContext('2d');
+      this.size();
+      addEventListener('resize', this.size);
+      el.classList.add('is-live');
+      this.amp = this.H * 0.011;          // the first pluck, full and clear
+      this.last = performance.now();
+      this.raf = requestAnimationFrame(this.frame);
+    },
+
+    size() {
+      const T = Tuning;
+      if (!T.cv) return;
+      T.W = innerWidth; T.H = innerHeight;
+      T.dpr = Math.min(2, window.devicePixelRatio || 1);
+      T.cv.width = Math.round(T.W * T.dpr);
+      T.cv.height = Math.round(T.H * T.dpr);
+      if (!(T.ty >= 0)) T.ty = T.H / 2;
+      if (!(T.y >= 0)) T.y = T.ty;
+    },
+
+    expect(n) { this.total += n; },
+    arrived() {
+      this.done++;
+      this.pluck(clamp(1 - this.done / this.total));
+    },
+    // The less there is left to come, the less the string has left in it:
+    // it is never plucked harder than what remains allows, so it audibly,
+    // visibly, comes into tune
+    pluck(left) {
+      const cap = this.H * 0.014 * (0.2 + 0.8 * left);
+      this.amp = Math.min(Math.max(this.amp, cap * 0.55), this.amp + cap * 0.3, cap);
+    },
+
+    frame(now) {
+      const T = Tuning;
+      if (!T.g) return;
+      const dt = clamp((now - T.last) / 1000, 0, 0.05);
+      T.last = now;
+      T.clock += dt;
+      // a string rings down, and finds the line it is to settle on
+      T.amp *= Math.exp(-dt * T.damp);
+      T.y += (T.ty - T.y) * (1 - Math.exp(-dt * 5));
+      if (T.settled && T.amp < 0.15 && Math.abs(T.ty - T.y) < 0.3) {
+        T.amp = 0; T.y = T.ty;
+        const done = T.settled; T.settled = null; done();
+      }
+      T.draw();
+      T.raf = requestAnimationFrame(T.frame);
+    },
+
+    // A standing wave: the string's first three harmonics, fixed at the
+    // edges of the frame, so it always reads as one string, not a wave
+    draw() {
+      const { g, W, H, dpr, amp, y, clock } = this;
+      g.setTransform(dpr, 0, 0, dpr, 0, 0);
+      g.clearRect(0, 0, W, H);
+      g.beginPath();
+      const w = 2 * Math.PI * 1.6;
+      const n = Math.max(48, Math.round(W / 5));
+      for (let i = 0; i <= n; i++) {
+        const u = i / n;
+        const d = amp * (Math.sin(Math.PI * u) * Math.cos(w * clock)
+          + 0.34 * Math.sin(2 * Math.PI * u) * Math.cos(2 * w * clock + 0.7)
+          + 0.14 * Math.sin(3 * Math.PI * u) * Math.cos(3 * w * clock + 1.9));
+        if (i) g.lineTo(u * W, y + d); else g.moveTo(0, y + d);
+      }
+      g.lineWidth = 1;
+      g.strokeStyle = 'rgba(243, 241, 235, 0.6)';
+      g.stroke();
+    },
+
+    // In tune: it is damped quickly and rests on its line
+    settle(y) {
+      if (!this.g) return Promise.resolve();
+      if (y >= 0) this.ty = y;
+      this.damp = 8;
+      return new Promise(r => { this.settled = r; setTimeout(r, 700); });
+    },
+
+    stop() {
+      cancelAnimationFrame(this.raf);
+      this.raf = 0;
+      removeEventListener('resize', this.size);
+      if (this.cv) this.cv.remove();
+      this.cv = this.g = null;
+      if (this.el) this.el.classList.remove('is-live');
+    },
+
+    /* The downbeat. The line the name stands on rises from behind the
+       string (on a narrow frame, where the name is set in two lines, the
+       second hangs from it); the house lights come up on the stage, and
+       the foot of the card and the bar come in last. */
+    reveal() {
+      const anims = [];
+      const run = (el, frames, o) => { if (el) anims.push(el.animate(frames, Object.assign({ fill: 'backwards' }, o))); };
+      const out = 'cubic-bezier(0.16, 1, 0.3, 1)';     // the house style: arrive, don't slide
+      const sine = 'cubic-bezier(0.37, 0, 0.63, 1)';
+      root.classList.add('reel-overture');
+      // the name first, in the dark; then the lights come up round it, and
+      // the camera settles on the stage
+      run(this.el, [{ opacity: 1 }, { opacity: 0 }], { duration: 820, delay: 360, easing: sine, fill: 'forwards' });
+      run($('.hero-bg'), [{ transform: 'scale(1.06)' }, { transform: 'none' }], { duration: 1200, delay: 200, easing: out });
+      const ys = this.y;
+      [Stage.heroWords.dev, Stage.heroWords.dec].forEach((word, i) => {
+        const line = word.parentNode, r = line.getBoundingClientRect();
+        const size = px(getComputedStyle(word).fontSize), base = baseline(word);
+        // (the clip reaches well clear of the letters everywhere but at the
+        // string; each word starts just out of sight on its side of it)
+        const rises = base <= ys + 1;
+        const clip = rises
+          ? `inset(-60% -30% ${r2(r.bottom - ys)}px -30%)`
+          : `inset(${r2(ys - r.top)}px -30% -60% -30%)`;
+        const from = rises ? ys - (base - size * 0.84) : -(base + size * 0.06 - ys);
+        const delay = i * 110;
+        run(line, [{ clipPath: clip }, { clipPath: clip }], { duration: delay + 820 });
+        run(word, [{ transform: `translateY(${r2(from)}px)` }, { transform: 'none' }], { duration: 820, delay, easing: 'cubic-bezier(0.2, 0.85, 0.25, 1)' });
+      });
+      for (const el of [$('.hero-cta'), $('.hero-place')]) run(el, [{ opacity: 0 }, { opacity: 1 }], { duration: 480, delay: 820, easing: sine });
+      run($('#site-header'), [{ opacity: 0 }, { opacity: 1 }], { duration: 480, delay: 860, easing: sine, fill: 'forwards' });
+
+      return new Promise(resolve => {
+        let over = false;
+        const hands = ['wheel', 'touchstart', 'keydown', 'pointerdown'];
+        const end = () => {
+          if (over) return;
+          over = true;
+          hands.forEach(h => removeEventListener(h, cut, true));
+          root.classList.add('reel-tuned');
+          for (const a of anims) a.cancel();      // the film's own frame takes over
+          this.stop();
+          resolve();
+        };
+        const cut = () => { for (const a of anims) a.finish(); end(); };
+        hands.forEach(h => addEventListener(h, cut, { capture: true, passive: true }));
+        Promise.all(anims.map(a => a.finished.catch(() => {}))).then(end);
+      });
+    }
+  };
 
   /* ═══════════════════════════════════════════════════════════════
      REEL — public face
@@ -1721,12 +1966,19 @@ window.__reelBooted = true;
       try {
         Stage.build();
         SCENES.forEach(s => { s.el = document.getElementById(s.id); });
-        await Promise.all([fontsReady(), photoReady()]);
+        Tuning.expect(2);
+        Timings.init = Math.round(performance.now());
+        await Promise.all([fontsReady().then(() => { Timings.fonts = Math.round(performance.now()); Tuning.arrived(); }), photoReady().then(() => { Timings.photo = Math.round(performance.now()); Tuning.arrived(); })]);
         if (!root.classList.contains('reel')) { this.teardown(); return; }
         for (const c of Stage.st) {
-          if (Stage.curtainURL) c.curtain.src = Stage.curtainURL;
-          else c.curtain.style.background = rgba(VELVET);
+          const src = Stage.curtain;
+          if (src) {
+            c.curtain.width = src.width;
+            c.curtain.height = src.height;
+            c.curtain.getContext('2d').drawImage(src, 0, 0);
+          } else c.curtain.style.background = rgba(VELVET);
         }
+        Stage.curtain = null;
         preload();
 
         if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
@@ -1740,9 +1992,14 @@ window.__reelBooted = true;
         // on the screen; a reader returning to a later one is cut to it.
         root.classList.add('reel-on');
         rebuild(0);
+        // the string finds the line the name will stand on
+        Tuning.ty = baseline(Stage.heroWords.dev);
         if (scene) start = scene.at;
+        Timings.built = Math.round(performance.now());
         await imagesReady(2500);
+        Timings.images = Math.round(performance.now());
         await warm();
+        Timings.ready = Math.round(performance.now());
         if (!root.classList.contains('reel')) { this.teardown(); return; }
         Play.t = Play.target = 0;
         Play.draw(0);
@@ -1750,10 +2007,22 @@ window.__reelBooted = true;
         this.ready = true;
         root.classList.add('reel-ready');
         tell('reel:moved');
-        // a link chosen while the film was still getting ready goes now
+        // a link chosen while the film was still getting ready goes now,
+        // and a reader who scrolled meanwhile starts where they are
         if (this.queued !== undefined) start = this.queued;
         this.queued = undefined;
-        if (start > 0.01) setTimeout(() => Play.go(start, true), 380);
+        if (!(start > 0.01) && window.scrollY > 2) start = Play.readTarget();
+        await Tuning.settle();
+        if (start > 0.01) {
+          // further in: the dark frame is cut straight to that frame
+          Play.go(start, true);
+          await new Promise(r => setTimeout(r, CUT_COVER + 60));
+          root.classList.add('reel-overture', 'reel-tuned');
+          Tuning.stop();
+        } else {
+          await Tuning.reveal();
+        }
+        Timings.tuned = Math.round(performance.now());
       } catch (err) {
         console.error('Reel could not start; showing the page instead.', err);
         this.teardown();
@@ -1855,7 +2124,8 @@ window.__reelBooted = true;
       Stage.teardown();
       document.body.style.height = '';
       for (const img of $$('img[data-reel-lazy]')) { img.loading = 'lazy'; delete img.dataset.reelLazy; }
-      root.classList.remove('reel', 'reel-type', 'reel-on', 'reel-ready', 'reel-warming', 'is-scrubbing');
+      Tuning.stop();
+      root.classList.remove('reel', 'reel-type', 'reel-on', 'reel-ready', 'reel-warming', 'reel-overture', 'reel-tuned', 'is-scrubbing');
       $$('.is-live').forEach(el => el.classList.remove('is-live'));
       window.scrollTo(0, 0);
       document.dispatchEvent(new CustomEvent('reel:off'));
@@ -1880,6 +2150,11 @@ window.__reelBooted = true;
       lastCut: () => Play.lastCut,
       tune: t => Object.assign(Tune, t || {}),
       plan: () => ({ travel: Play.M && Object.fromEntries(Object.entries(Play.M.rides).map(([k, v]) => [k, v.travel])) }),
+      timings: () => Object.assign({ sinceStart: Math.round(performance.now()) }, Timings),
+      tuning: () => ({ amp: Tuning.amp, y: Tuning.y, ty: Tuning.ty, done: Tuning.done, total: Tuning.total, live: !!Tuning.g }),
     }
   };
+
+  // The string is tuned from the first frame the script can draw
+  if (root.classList.contains('reel')) Tuning.start();
 })();
