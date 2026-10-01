@@ -748,7 +748,10 @@ const Gallery = {
     const remove = () => {
       if (box.parentNode) box.parentNode.removeChild(box);
       ScrollLock.off();
-      if (item && item.focus) item.focus({ preventScroll: true });   // return focus to the plate it closed on
+      // The reader may have cut to another scene while the closing zoom
+      // finishes. Only return focus when this plate still belongs on screen.
+      if (item && item.focus && (!window.Reel || !window.Reel.active || window.Reel.holding('gallery')))
+        item.focus({ preventScroll: true });
     };
     if (!Motion.ok()) { remove(); return; }
     this._zoom(box, item, false, remove);
@@ -977,7 +980,10 @@ const Player = {
     this.el.hidden = true;
     this.el.classList.remove('is-docked');
     this.state = 'closed';
-    if (refocus && this.link) {
+    // A closing player may finish after the reader has already scrolled or
+    // cut to another scene. Returning focus to its old card would pull the
+    // reel back to Performances just as the new scene arrives.
+    if (refocus && this.link && (!window.Reel || !window.Reel.active || window.Reel.holding('performances'))) {
       const r = this.link.getBoundingClientRect();
       if (Motion.seen(r)) this.link.focus({ preventScroll: true });
     }

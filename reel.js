@@ -1785,7 +1785,9 @@ window.__reelBooted = true;
     Tuning.expect(WARM.length);
     for (const t of WARM) {
       Play.film.render(t);
-      await frames(3);
+      // Two painted frames are enough to establish each scene's layers;
+      // a third pass only lengthens the opening on fast connections.
+      await frames(2);
       Tuning.arrived();
     }
     root.classList.remove('reel-warming');
@@ -1888,7 +1890,10 @@ window.__reelBooted = true;
       if (!this.g) return Promise.resolve();
       if (y >= 0) this.ty = y;
       this.damp = 8;
-      return new Promise(r => { this.settled = r; setTimeout(r, 700); });
+      return new Promise(r => {
+        this.settled = r;
+        setTimeout(() => { this.settled = null; r(); }, 220);
+      });
     },
 
     stop() {
@@ -1912,8 +1917,8 @@ window.__reelBooted = true;
       root.classList.add('reel-overture');
       // the name first, in the dark; then the lights come up round it, and
       // the camera settles on the stage
-      run(this.el, [{ opacity: 1 }, { opacity: 0 }], { duration: 820, delay: 360, easing: sine, fill: 'forwards' });
-      run($('.hero-bg'), [{ transform: 'scale(1.06)' }, { transform: 'none' }], { duration: 1200, delay: 200, easing: out });
+      run(this.el, [{ opacity: 1 }, { opacity: 0 }], { duration: 560, delay: 170, easing: sine, fill: 'forwards' });
+      run($('.hero-bg'), [{ transform: 'scale(1.04)' }, { transform: 'none' }], { duration: 720, delay: 60, easing: out });
       const ys = this.y;
       [Stage.heroWords.dev, Stage.heroWords.dec].forEach((word, i) => {
         const line = word.parentNode, r = line.getBoundingClientRect();
@@ -1925,12 +1930,12 @@ window.__reelBooted = true;
           ? `inset(-60% -30% ${r2(r.bottom - ys)}px -30%)`
           : `inset(${r2(ys - r.top)}px -30% -60% -30%)`;
         const from = rises ? ys - (base - size * 0.84) : -(base + size * 0.06 - ys);
-        const delay = i * 110;
-        run(line, [{ clipPath: clip }, { clipPath: clip }], { duration: delay + 820 });
-        run(word, [{ transform: `translateY(${r2(from)}px)` }, { transform: 'none' }], { duration: 820, delay, easing: 'cubic-bezier(0.2, 0.85, 0.25, 1)' });
+        const delay = i * 80;
+        run(line, [{ clipPath: clip }, { clipPath: clip }], { duration: delay + 620 });
+        run(word, [{ transform: `translateY(${r2(from)}px)` }, { transform: 'none' }], { duration: 620, delay, easing: 'cubic-bezier(0.2, 0.85, 0.25, 1)' });
       });
-      for (const el of [$('.hero-cta'), $('.hero-place')]) run(el, [{ opacity: 0 }, { opacity: 1 }], { duration: 480, delay: 820, easing: sine });
-      run($('#site-header'), [{ opacity: 0 }, { opacity: 1 }], { duration: 480, delay: 860, easing: sine, fill: 'forwards' });
+      for (const el of [$('.hero-cta'), $('.hero-place')]) run(el, [{ opacity: 0 }, { opacity: 1 }], { duration: 280, delay: 420, easing: sine });
+      run($('#site-header'), [{ opacity: 0 }, { opacity: 1 }], { duration: 280, delay: 450, easing: sine, fill: 'forwards' });
 
       return new Promise(resolve => {
         let over = false;
