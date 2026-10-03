@@ -38,7 +38,7 @@ const musiciansData = [
     name: 'Advaith Balakrishnan',
     instrument: 'Cello',
     imageLink: 'images/IMG_5580.JPG',
-    bio: "I'm Advaith Balakrishnan, a current junior at Hinsdale Central High School. I have played cello since 5th grade. Outside of orchestra, I enjoy playing piano and singing Indian classical music. Additionally I am a part of my school's track and field team and I am a starter on the Hinsdale Central Boys Varsity Soccer team."
+    bio: "I'm Advaith Balakrishnan, a current senior at Hinsdale Central High School. I have played cello since 5th grade. Outside of orchestra, I enjoy playing piano and singing Indian classical music. Additionally I am a part of my school's track and field team and I am a starter on the Hinsdale Central Boys Varsity Soccer team."
   },
   {
     name: 'Vincent Lan',
@@ -56,13 +56,13 @@ const musiciansData = [
     name: 'Max Zheng',
     instrument: 'Violin',
     imageLink: 'images/IMG_5584.PNG',
-    bio: "Hello, I'm Max, a junior at Hinsdale Central. I have been playing violin for almost 3 years, and piano for 11. I am super passionate about music. I love listening to and playing classical music, and I love playing music with friends. My favorite composers are Rachmaninoff, Stravinsky, and Shostakovich. Along with music, I am also passionate about mathematics."
+    bio: "Hello, I'm Max, a senior at Hinsdale Central. I have been playing violin for almost 3 years, and piano for 11. I am super passionate about music. I love listening to and playing classical music, and I love playing music with friends. My favorite composers are Rachmaninoff, Stravinsky, and Shostakovich. Along with music, I am also passionate about mathematics."
   },
   {
     name: 'Brandon Kim',
     instrument: 'Violin',
     imageLink: 'images/IMG_5604.JPG',
-    bio: "I'm Brandon Kim, a junior at Hinsdale Central High School. I started playing the violin when I was eleven years old, and have fallen in love ever since, and have represented the school in ILMEA District and All-State Orchestras. When I am not playing the violin, I enjoy running on our school's varsity track team, and cooking different types of foods with my mother."
+    bio: "I'm Brandon Kim, a senior at Hinsdale Central High School. I started playing the violin when I was eleven years old, and have fallen in love ever since, and have represented the school in ILMEA District and All-State Orchestras. When I am not playing the violin, I enjoy running on our school's varsity track team, and cooking different types of foods with my mother."
   },
   {
     name: 'Oliver Clary',
@@ -602,7 +602,20 @@ const Gallery = {
 
     document.addEventListener('keydown', e => {
       if (!this.box) return;
-      if (e.key === 'Escape')          this.close();
+      if (e.key === 'Tab') {
+        const controls = this.box.querySelectorAll('.lightbox-close, .lightbox-nav');
+        const first = controls[0], last = controls[controls.length - 1];
+        if (!this.box.contains(document.activeElement)) {
+          e.preventDefault();
+          first.focus();
+        } else if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      } else if (e.key === 'Escape')     this.close();
       else if (e.key === 'ArrowRight') this.step(1);
       else if (e.key === 'ArrowLeft')  this.step(-1);
     });
