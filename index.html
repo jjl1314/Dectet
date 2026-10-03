@@ -41,6 +41,7 @@
 
   <!-- The film opens on this photograph -->
   <link rel="preload" as="image" href="images/holiday.jpg">
+  <link rel="preload" as="image" href="images/feature.jpg">
 
   <link rel="stylesheet" href="styles.css">
 
@@ -50,6 +51,12 @@
        film never boots, the page is handed back as the static site. -->
   <script>
     (function (root) {
+      var navigation = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+      if (navigation && navigation.type === 'reload') {
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+        if (location.hash) history.replaceState(history.state, '', location.pathname + location.search);
+        addEventListener('DOMContentLoaded', function () { scrollTo(0, 0); }, { once: true });
+      }
       var calm = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (calm) return;
       root.classList.add('reel');
@@ -101,7 +108,7 @@
        current timecode. Without it, this is the page exactly as before. -->
   <main id="main" class="reel-stage">
 
-  <!-- While the film gets ready, one string is tuned here (reel.js) -->
+  <!-- Four animated strings mark the film getting ready (reel.js) -->
   <div class="tuning" aria-hidden="true"></div>
 
   <!-- ─── Hero ──────────────────────────────────────────────── -->

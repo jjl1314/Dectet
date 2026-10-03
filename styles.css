@@ -1186,13 +1186,10 @@ html.reel:not(.reel-ready) .hero-title .word-mask + .word-mask > .word {
   letter-spacing: inherit !important;
   will-change: auto !important;
 }
-html.reel:not(.reel-ready) .fly { visibility: hidden !important; }
 
 /* ── Tuning: the film's preloader ───────────────────────────── */
-/* While the film gets ready (its typefaces, its photographs, and one pass
-   over every scene so none of them stalls later), the frame is dark and
-   one string is tuned across it: plucked as each part arrives, it settles
-   as the last one does. Then the name rises out of it and the house lights
+/* While the film gets ready, four strings respond to actual load events.
+   Then the name rises out of the dark and the house lights
    come up. It lasts exactly as long as the loading does, and a hand on the
    scroll ends it at once. (reel.js plays it.) */
 .tuning { display: none; }
@@ -1206,26 +1203,26 @@ html.reel .tuning {
   /* the dark the string hangs in, over everything the warm-up is passing
      through underneath; just short of opaque, because under a fully
      opaque pane the browser stops rasterising what is beneath it */
-  background: rgba(28, 24, 19, 0.985);
+  background: rgba(28, 24, 19, 0.995);
   pointer-events: none;
 }
-/* the string, still, until the script takes it up */
+/* Four strings are present from the first paint, before canvas starts. */
 html.reel .tuning::before {
   content: '';
   position: absolute;
-  left: 0; right: 0;
-  top: 50%;
-  height: 1px;
-  background: rgba(243, 241, 235, 0.6);
+  inset: 0;
+  background:
+    linear-gradient(rgba(243, 241, 235, 0.36), rgba(243, 241, 235, 0.36)) center 45.8% / 100% 1px no-repeat,
+    linear-gradient(rgba(243, 241, 235, 0.6), rgba(243, 241, 235, 0.6)) center 48.6% / 100% 1px no-repeat,
+    linear-gradient(rgba(243, 241, 235, 0.66), rgba(243, 241, 235, 0.66)) center 51.4% / 100% 1px no-repeat,
+    linear-gradient(rgba(243, 241, 235, 0.4), rgba(243, 241, 235, 0.4)) center 54.2% / 100% 1px no-repeat;
 }
 html.reel .tuning.is-live::before { display: none; }
 html.reel .tuning canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
 html.reel.reel-tuned .tuning { display: none; }
-/* Until the downbeat the title card waits, all but invisible, so the
-   browser has it rasterised and ready to show; the bar comes in after
-   the name */
-html.reel:not(.reel-overture) .hero-bg,
-html.reel:not(.reel-overture) .hero-content { opacity: 0.005 !important; }
+/* The title stays fully hidden during loading; it enters with the overture. */
+html.reel:not(.reel-overture) .hero-bg { opacity: 0.005 !important; }
+html.reel:not(.reel-overture) .hero-content { opacity: 0 !important; }
 html.reel:not(.reel-tuned) header { opacity: 0; pointer-events: none; }
 
 /* Scenes share the frame. Each is a transparent page over one ground,
@@ -1265,7 +1262,7 @@ html.reel .statement     { z-index: 7; }   /* the curtain, over the stage and th
 html.reel #contact       { z-index: 8; }   /* the ink, over everything it washes up across */
 html.reel .hero-content  { z-index: 10; }  /* the name, and the word that travels */
 
-.reel-ground, .fly, .st-dim, .m-half, .ens, .g-light, .c-wash { display: none; }
+.reel-ground, .st-dim, .m-half, .ens, .g-light, .c-wash { display: none; }
 /* A scene that fits is set in the middle of the frame (reel.js measures it) */
 html.reel #performances .container,
 html.reel #gallery .container,
@@ -1274,7 +1271,7 @@ html.reel #contact .container { margin-top: var(--drop, 0px); }
 /* The film's own layers are pictures, not text: copies of words already on
    the page, and the stage's decoration. Selecting the page selects its
    words, and only where they can be seen. */
-html.reel .st-copy, html.reel .fly-land, html.reel .ens, html.reel .st-wash,
+html.reel .st-copy, html.reel .ens, html.reel .st-wash,
 html.reel .st-dim, html.reel .m-half, html.reel .g-light, html.reel .c-wash,
 html.reel .reel-ground, html.reel .reel-shield, html.reel .reel-cut { -webkit-user-select: none; user-select: none; }
 html.reel .reel-ground {
@@ -1347,26 +1344,8 @@ html.reel .hero-foot {
     line-height: 0.84;
   }
 }
-/* The copy the travelling word is handed to as it lands in the statement.
-   reel.js sets its size, spacing and colour as it comes in. */
-html.reel .fly {
-  display: block;
-  position: absolute;
-  left: 0; top: 0;
-  font-family: var(--f-display);
-  font-style: italic;
-  font-weight: var(--d-wght);
-  font-stretch: var(--d-wdth);
-  line-height: 1;
-  white-space: nowrap;
-  color: #F3F1EB;
-  pointer-events: none;
-  transform-origin: 0 0;
-}
-
 /* ── The statement, on the curtain ──────────────────────────── */
-/* Two copies, each showing one half, so the curtain can part down the
-   middle with the words on it */
+/* Two copies let the empty curtain part after the message has left. */
 html.reel .statement {
   padding: 0;
   display: block;
