@@ -73,8 +73,8 @@ const musiciansData = [
 ];
 
 /* ═══════════════════════════════════════════════════════════════
-   Scroll lock. Hiding overflow removes the scrollbar, which pulls the
-   whole page sideways; reserving its width keeps everything still.
+   Scroll lock. The reel reserves its scrollbar gutter in CSS; the
+   static page needs padding while an overlay has hidden the scrollbar.
 ═══════════════════════════════════════════════════════════════ */
 const ScrollLock = {
   depth: 0,
@@ -82,7 +82,8 @@ const ScrollLock = {
     if (this.depth++ > 0) return;
     const bar = window.innerWidth - document.documentElement.clientWidth;
     document.body.style.overflow = 'hidden';
-    if (bar > 0) {
+    const gutter = getComputedStyle(document.documentElement).scrollbarGutter || '';
+    if (bar > 0 && !gutter.includes('stable')) {
       document.body.style.paddingRight = bar + 'px';
       document.documentElement.style.setProperty('--sbw', bar + 'px');
     }

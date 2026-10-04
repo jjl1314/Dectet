@@ -1147,7 +1147,10 @@ html.reel {
   --reel-bottom: clamp(28px, 6vh, 64px);
   --ui-gap: 0px;                            /* mobile browser chrome */
   background: var(--plate);
+  scrollbar-gutter: stable;
 }
+/* Keep the opening frame in place until the title has finished entering. */
+html.reel:not(.reel-tuned) { overflow: hidden; }
 @supports (height: 100lvh) {
   html.reel { --ui-gap: calc(100lvh - 100svh); }
 }
@@ -1189,9 +1192,8 @@ html.reel:not(.reel-ready) .hero-title .word-mask + .word-mask > .word {
 
 /* ── Tuning: the film's preloader ───────────────────────────── */
 /* While the film gets ready, four strings respond to actual load events.
-   Then the name rises out of the dark and the house lights
-   come up. It lasts exactly as long as the loading does, and a hand on the
-   scroll ends it at once. (reel.js plays it.) */
+   Then the name rises out of the dark and the house lights come up.
+   Scrolling begins after the title has arrived. (reel.js plays it.) */
 .tuning { display: none; }
 /* (in the frame, over the photograph and under the name, which rises out
    of it: the frame itself is dark until the house lights come up) */
@@ -1223,6 +1225,8 @@ html.reel.reel-tuned .tuning { display: none; }
 /* The title stays fully hidden during loading; it enters with the overture. */
 html.reel:not(.reel-overture) .hero-bg { opacity: 0.005 !important; }
 html.reel:not(.reel-overture) .hero-content { opacity: 0 !important; }
+html.reel:not(.reel-tuned) .hero-content,
+html.reel:not(.reel-tuned) .hero-foot { pointer-events: none !important; }
 html.reel:not(.reel-tuned) header { opacity: 0; pointer-events: none; }
 
 /* Scenes share the frame. Each is a transparent page over one ground,
@@ -1251,6 +1255,13 @@ html.reel .roster-grid { row-gap: clamp(22px, 3.4vh, 44px); }
 @media (min-width: 1201px) {
   html.reel .roster-grid > :nth-child(5n+2),
   html.reel .roster-grid > :nth-child(5n+4) { margin-top: clamp(16px, 3.6vh, 56px); }
+}
+@media (min-width: 1201px) and (max-height: 820px) {
+  html.reel #members .section-header { margin-bottom: clamp(18px, 2.4vh, 24px); }
+  html.reel #members .roster-grid { row-gap: clamp(12px, 1.6vh, 18px); }
+  html.reel #members .roster-grid > :nth-child(5n+2),
+  html.reel #members .roster-grid > :nth-child(5n+4) { margin-top: clamp(12px, 1.7vh, 20px); }
+  html.reel #members .member-info { padding-top: 12px; }
 }
 html.reel .reel-ground   { z-index: 1; }
 html.reel #gallery       { z-index: 2; }   /* the photographs come up behind the recordings, */
@@ -1418,7 +1429,7 @@ html.reel .st-body {
 }
 
 /* ── The ensemble ───────────────────────────────────────────── */
-html.reel #members .container { max-width: var(--fit-w, var(--max-w)); }
+html.reel #members .container { max-width: var(--fit-w, var(--max-w)); margin-top: var(--member-offset, 0px); }
 /* The ten pieces of the photograph live in their own 3D space over the
    roster; each has a portrait on its back */
 html.reel .ens {

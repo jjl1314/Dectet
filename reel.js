@@ -651,16 +651,25 @@ window.__reelBooted = true;
   }
 
   function layout(F) {
-    // Members: the roster as the original lays it out, fitted to the frame
-    // while every portrait stays at least 140px wide (on a phone, never
-    // shrunk at all)
+    // The ten portrait targets are measured after the roster is composed.
+    // Centre the whole page before those pieces fly in, keeping portrait
+    // dimensions intact. Narrow scenes still travel with the reader.
     const mBox = $('#members .container');
     const roster = $('#members .roster-grid');
     const rcs = getComputedStyle(roster);
     const cols = rcs.gridTemplateColumns.split(' ').filter(Boolean).length;
     const minW = F.narrow ? Infinity : cols * 140 + (cols - 1) * px(rcs.columnGap);
     F.membersFit = fitWidth(mBox, roster, F.bottom, minW).fits;
-    F.membersTravel = F.membersFit ? 0 : Math.max(0, roster.getBoundingClientRect().bottom - F.bottom);
+    const m = mBox.getBoundingClientRect();
+    const room = F.Hs - m.height;
+    const edge = Math.max(32, F.Hs * 0.045);
+    if (cols === 5 && room >= edge * 2) {
+      Paint.set(mBox, '--member-offset', `${r2(room / 2 - m.top)}px`);
+      F.membersFit = true;
+      F.membersTravel = 0;
+    } else {
+      F.membersTravel = F.membersFit ? 0 : Math.max(0, roster.getBoundingClientRect().bottom - F.bottom);
+    }
 
     layPerf(F);
     layGallery(F);
@@ -1268,16 +1277,16 @@ window.__reelBooted = true;
         t0: K.pass + 0.75 + 0.07 * k,
       };
     });
-    const [g0, g1] = HOLD.gallery;
     f.rig(K.pass + 0.7, K.press + 0.91, t => {
-      // while they hold, the wall of photographs is slowly pushed into
-      const push = gTravel ? 1 : lerp(1, 1.03, E.inOutSine(span(t, g0, g1 - g0)));
+      // Each photograph holds its exact place above its caption. Once the
+      // captions are gone, the photographs leave the wall for the pile.
       for (const p of plates) {
         const fly = span(t, p.t0, 1.1);
         const z = lerp(-2600, 0, E.outExpo(fly));
-        const col = E.inOutCubic(span(t, K.gather + 0.05 * p.k, K.press - K.gather - 0.35));
-        const sc = lerp(push, p.ts, col), rot = lerp(0, p.tr, col);
-        const cx = lerp(V.x + (p.cx - V.x) * push, p.tx, col), cy = lerp(V.y + (p.cy - V.y) * push, p.ty, col);
+        const gatherAt = K.gather + 0.24 + 0.055 * p.k;
+        const col = E.inOutCubic(span(t, gatherAt, K.press - 0.18 - gatherAt));
+        const sc = lerp(1, p.ts, col), rot = lerp(0, p.tr, col);
+        const cx = lerp(p.cx, p.tx, col), cy = lerp(p.cy, p.ty, col);
         const vx = (p.cx - V.x) * sc, vy = (p.cy - V.y) * sc;
         const cs = Math.cos(rot * DEG), sn = Math.sin(rot * DEG);
         const dx = cx - V.x - (vx * cs - vy * sn);
@@ -1288,7 +1297,7 @@ window.__reelBooted = true;
         Paint.set(p.photo, 'opacity', String(r3(clamp(fly * 5) * (1 - E.inOutSine(span(t, K.press + 0.5, 0.4))))));
       }
     });
-    // the captions are let go with it, before their photographs move
+    // Captions settle in with the plates and leave before they gather.
     plates.forEach(p => {
       const t0 = p.t0 + 0.95;
       f.key(p.venue, 'o', [[t0, 0], [t0 + 0.5, 1, 'outQuad'], [K.gather - 0.15, 1], [K.gather + 0.15, 0, 'inQuad']]);
@@ -1816,7 +1825,8 @@ window.__reelBooted = true;
      Each arrival plucks a different voice, which settles before the name
      enters. There is no text behind the strings during the preloader.
      On the downbeat the house lights come up. Nothing here is waited for:
-     it lasts as long as the loading, and a hand on the scroll ends it.
+     it lasts as long as the loading; the page opens to scrolling after the
+     name has arrived.
   ═══════════════════════════════════════════════════════════════ */
   const Tuning = {
     el: null, cv: null, g: null, raf: 0, last: 0, clock: 0,
@@ -1957,21 +1967,10 @@ window.__reelBooted = true;
       for (const el of [$('.hero-cta'), $('.hero-place')]) run(el, [{ opacity: 0 }, { opacity: 1 }], { duration: 280, delay: 420, easing: sine });
       run($('#site-header'), [{ opacity: 0 }, { opacity: 1 }], { duration: 280, delay: 450, easing: sine, fill: 'forwards' });
 
-      return new Promise(resolve => {
-        let over = false;
-        const hands = ['wheel', 'touchstart', 'keydown', 'pointerdown'];
-        const end = () => {
-          if (over) return;
-          over = true;
-          hands.forEach(h => removeEventListener(h, cut, true));
-          root.classList.add('reel-tuned');
-          for (const a of anims) a.cancel();      // the film's own frame takes over
-          this.stop();
-          resolve();
-        };
-        const cut = () => { for (const a of anims) a.finish(); end(); };
-        hands.forEach(h => addEventListener(h, cut, { capture: true, passive: true }));
-        Promise.all(anims.map(a => a.finished.catch(() => {}))).then(end);
+      return Promise.all(anims.map(a => a.finished.catch(() => {}))).then(() => {
+        root.classList.add('reel-tuned');
+        for (const a of anims) a.cancel();      // the film's own frame takes over
+        this.stop();
       });
     }
   };
